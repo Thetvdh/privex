@@ -1,0 +1,17 @@
+
+# Domain Information
+DomainDNSName: FYP.loc
+DomainNetBIOSName: FYP
+DomainPreferredLDAPServer: FYPDC.FYP.loc
+
+# Service Account Information
+ScannerUsername: svc_scanner
+ScannerPassword: fakepassword123
+
+WorkerUsername: svc_worker
+WorkerPassword: fakepassword123
+
+# Database File Location
+DBFileLocation: /home/privex/privex/DB
+DBFileName: privexdb.db
+
