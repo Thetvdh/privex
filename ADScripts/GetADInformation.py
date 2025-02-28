@@ -102,8 +102,8 @@ class LDAPController:
 if __name__ == '__main__':
     controller = LDAPController()
     controller.check_connection()
-    # ad_computers = controller.get_ad_computers()
-    # ad_users = controller.get_ad_users()
-    # print(json.dumps(ad_computers, indent=4))
-    # print("\n\n\n\n")
-    # print(json.dumps(ad_users, indent=4))
+    ad_computers = controller.get_ad_computers()
+    ad_users = controller.get_ad_users()
+    print(json.dumps(ad_computers, indent=4))
+    print("\n\n\n\n")
+    print(json.dumps(ad_users, indent=4))
