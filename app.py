@@ -1,8 +1,4 @@
 from flask import Flask
-from testing import test
-import os
-print("FLASK_APP:", os.environ.get("FLASK_APP"))
-print("FLASK_ENV:", os.environ.get("FLASK_ENV"))
 app = Flask(__name__)
 
 
