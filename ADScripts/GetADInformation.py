@@ -3,6 +3,9 @@ import json
 import yaml
 import socket
 
+from ldap3.core.exceptions import LDAPBindError
+
+
 def load_config():
     with open("domain_config.yaml", "r") as config_file:
         ad_config = yaml.safe_load(config_file)
@@ -24,20 +27,24 @@ class LDAPController:
         server = Server(self.AD_SERVER, get_info=ALL, use_ssl=True)
 
         # Create a connection to the server
-        conn = Connection(server, user=self.USER, password=self.PASSWORD, authentication=NTLM, auto_bind=True)
+        try:
+            conn = Connection(server, user=self.USER, password=self.PASSWORD, authentication=NTLM, auto_bind=True)
+            if not conn.bind():
+                print("Failed to bind", conn.result)
+                return False
+            return conn
+        except LDAPBindError as e:
+            print("[ERROR] Unable to bind to LDAP server", e)
+            return False
 
-        if not conn.bind():
-            # TODO add error handling for failed bind
-            print("Failed to bind", conn.result)
-        return conn
+
 
     def get_ad_computers(self):
         # Search filter for computers
         search_filter = "(objectClass=computer)"
 
         # Attributes to retrieve
-        attributes = ['dnsHostName', 'objectSid']
-
+        attributes = ['dnsHostName', 'objectSid', 'OperatingSystem']
         # Perform the search
         self.conn.search(self.BASE_DN, search_filter, attributes=attributes)
 
@@ -56,7 +63,8 @@ class LDAPController:
             computer_info = {
                 'FQDN': entry.dnsHostName.value,
                 'IP Address': ip_addr,
-                'SID': entry.objectSid.value
+                'SID': entry.objectSid.value,
+                'OperatingSystem': entry.OperatingSystem.value
             }
             computers.append(computer_info)
         return computers
@@ -83,13 +91,19 @@ class LDAPController:
         return users
     # Debug function for testing LDAP connection status, not used in ordinary operation
     def check_connection(self):
+        # Prints conn status, returns false if conn is not established
         print("Testing LDAP connection status")
-        print(self.conn.result)
+        print(self.conn)
+        if not self.conn:
+            return False
+        else:
+            return True
 
 if __name__ == '__main__':
     controller = LDAPController()
-    ad_computers = controller.get_ad_computers()
-    ad_users = controller.get_ad_users()
-    print(json.dumps(ad_computers, indent=4))
-    print("\n\n\n\n")
-    print(json.dumps(ad_users, indent=4))
+    controller.check_connection()
+    # ad_computers = controller.get_ad_computers()
+    # ad_users = controller.get_ad_users()
+    # print(json.dumps(ad_computers, indent=4))
+    # print("\n\n\n\n")
+    # print(json.dumps(ad_users, indent=4))
