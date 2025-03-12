@@ -64,7 +64,7 @@ class LDAPController:
             # Creates python dictionary containing computer information
             computer_info = {
                 'FQDN': entry.dnsHostName.value,
-                'IP Address': ip_addr,
+                'ip_addr': ip_addr,
                 'objectSid': entry.objectSid.value,
                 'OperatingSystem': entry.OperatingSystem.value
             }
