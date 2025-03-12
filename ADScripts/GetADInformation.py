@@ -76,7 +76,7 @@ class LDAPController:
         search_filter = "(objectClass=user)"
 
         # Attributes to retrieve
-        attributes = ['SamAccountName', 'UserPrincipalName', 'objectSid']
+        attributes = ['SamAccountName', 'objectSid']
 
         # Perform the search
         self.conn.search(self.BASE_DN, search_filter, attributes=attributes)
@@ -86,7 +86,6 @@ class LDAPController:
         for entry in self.conn.entries:
             user_info = {
                 "samAccountName": entry.SamAccountName.value,
-                "UserPrincipalName": entry.UserPrincipalName.value,
                 "objectSid": entry.ObjectSid.value
             }
             users.append(user_info)

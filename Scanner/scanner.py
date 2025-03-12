@@ -16,4 +16,14 @@ def add_computers():
             print(f"Failed to add computer {computer['FQDN']}")
 
 
+def get_users():
+    users = ldap_controller.get_ad_users()
+    return users
 
+def add_users():
+    users = get_users()
+    for user in users:
+        if not database.add_user(user):
+            print(f"Failed to add user {user['samAccountName']}")
+
+add_users()
