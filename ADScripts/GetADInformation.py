@@ -66,7 +66,7 @@ class LDAPController:
                 'FQDN': entry.dnsHostName.value,
                 'ip_addr': ip_addr,
                 'objectSid': entry.objectSid.value,
-                'OperatingSystem': entry.OperatingSystem.value
+                'operating_system': entry.OperatingSystem.value
             }
             computers.append(computer_info)
         return computers
