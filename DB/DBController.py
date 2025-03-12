@@ -1,15 +1,14 @@
 import sqlite3
 import uuid
-import os
 
 class DBConnector:
     def __init__(self):
         self.name = f"DB/privex.db"
         self.connection = None
         self.cursor = None
-        self.establish_conection()
+        self.establish_connection()
 
-    def establish_conection(self):
+    def establish_connection(self):
         try:
             self.connection = sqlite3.connect(self.name)
             self.cursor = self.connection.cursor()
