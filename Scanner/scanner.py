@@ -1,5 +1,17 @@
 from DB.DBController import DBInterface
 from ADScripts.GetADInformation import LDAPController
+import logging
+
+logging.basicConfig(
+    filename="scanner.log",
+    encoding="utf-8",
+    filemode="a",
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    datefmt="%d/%m/%Y %I:%M:%S",
+)
+
+
+
 
 database = DBInterface()
 ldap_controller = LDAPController()
@@ -12,8 +24,11 @@ def get_computers():
 def add_computers():
     computers = get_computers()
     for computer in computers:
+        if database.check_unique_computer_sid(computer["objectSid"]):
+            logging.info(f"Computer {computer['FQDN']} already exists")
+            continue
         if not database.add_computer(computer):
-            print(f"Failed to add computer {computer['FQDN']}")
+            logging.error(f"Failed to add computer {computer['FQDN']}")
 
 
 def get_users():
@@ -23,7 +38,8 @@ def get_users():
 def add_users():
     users = get_users()
     for user in users:
+        if database.check_unique_user_sid(user["objectSid"]):
+            logging.info(f"User {user['samAccountName']} already exists")
+            continue
         if not database.add_user(user):
-            print(f"Failed to add user {user['samAccountName']}")
-
-add_users()
+            logging.info(f"Failed to add user {user['samAccountName']}")
