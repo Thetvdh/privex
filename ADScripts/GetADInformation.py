@@ -7,7 +7,7 @@ from ldap3.core.exceptions import LDAPBindError
 
 
 def load_config():
-    with open("domain_config.yaml", "r") as config_file:
+    with open("ADScripts/domain_config.yaml", "r") as config_file:
         ad_config = yaml.safe_load(config_file)
     return ad_config
 
@@ -39,6 +39,9 @@ class LDAPController:
 
 
     def get_ad_computers(self):
+        if not self.conn:
+            print("[ERROR] no valid LDAP connection")
+            return False
         # Search filter for computers
         search_filter = "(objectClass=computer)"
 
@@ -62,7 +65,7 @@ class LDAPController:
             computer_info = {
                 'FQDN': entry.dnsHostName.value,
                 'IP Address': ip_addr,
-                'SID': entry.objectSid.value,
+                'objectSid': entry.objectSid.value,
                 'OperatingSystem': entry.OperatingSystem.value
             }
             computers.append(computer_info)
@@ -97,6 +100,9 @@ class LDAPController:
             return False
         else:
             return True
+
+    def __str__(self):
+        return f"DEBUG\n{self.USER}, {self.PASSWORD}"
 
 if __name__ == '__main__':
     controller = LDAPController()
