@@ -38,20 +38,19 @@ class LDAPController:
             return False
 
 
-
     def get_ad_computers(self):
         # Search filter for computers
         search_filter = "(objectClass=computer)"
 
         # Attributes to retrieve
         attributes = ['dnsHostName', 'objectSid', 'OperatingSystem']
-        # Perform the search
+
         self.conn.search(self.BASE_DN, search_filter, attributes=attributes)
 
         computers = []
         for entry in self.conn.entries:
             hostname = entry.dnsHostName.value
-            # Attempts to get IP Address of the host
+            # Attempts to get IP Address of the host using sockets
             if hostname:
                 try:
                     ip_addr = socket.gethostbyname(hostname)
