@@ -11,8 +11,6 @@ logging.basicConfig(
 )
 
 
-
-
 database = DBInterface()
 ldap_controller = LDAPController()
 
@@ -43,3 +41,6 @@ def add_users():
             continue
         if not database.add_user(user):
             logging.info(f"Failed to add user {user['samAccountName']}")
+
+def get_computer_admins_windows():
+    pass

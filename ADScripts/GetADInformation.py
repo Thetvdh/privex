@@ -7,7 +7,7 @@ from ldap3.core.exceptions import LDAPBindError
 
 
 def load_config():
-    with open("ADScripts/domain_config.yaml", "r") as config_file:
+    with open("domain_config.yaml", "r") as config_file:
         ad_config = yaml.safe_load(config_file)
     return ad_config
 
