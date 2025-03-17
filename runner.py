@@ -1,21 +1,8 @@
 from Scanner import scanner
-from ComputerInterface import windows
+from DB.DBController import DBInterface
 
-# scanner.get_computers()
-#
-# scanner.add_computers()
-#
-# scanner.add_users()
+admins = scanner.get_computer_admins_windows('WINSERVFYP.FYP.LOC')
 
-win_scanner = windows.WindowsWorker()
+interface = DBInterface()
 
-session = win_scanner.establish_winrm_session('WINSERVFYP.FYP.LOC')
-print("\n\n\n\n\n")
-
-admins = win_scanner.get_computer_administrators(session)
-
-print(admins)
-#
-# win_scanner.get_kerberos_ticket()
-# win_scanner.debug()
-
+interface.setup_add_computer_admins(admins, "WINSERVFYP.FYP.LOC", "FYP")

@@ -1,5 +1,7 @@
+from ComputerInterface.windows import WindowsWorker
 from DB.DBController import DBInterface
 from ADScripts.GetADInformation import LDAPController
+from ComputerInterface import windows
 import logging
 
 logging.basicConfig(
@@ -18,7 +20,7 @@ def get_computers():
     computers = ldap_controller.get_ad_computers()
     return computers
 
-
+# Function to add computers in AD to the local database
 def add_computers():
     computers = get_computers()
     for computer in computers:
@@ -42,5 +44,9 @@ def add_users():
         if not database.add_user(user):
             logging.info(f"Failed to add user {user['samAccountName']}")
 
-def get_computer_admins_windows():
-    pass
+def get_computer_admins_windows(computer_fqdn):
+    win_interface = WindowsWorker()
+    session = win_interface.establish_winrm_session(computer_fqdn)
+    return win_interface.get_computer_administrators(session)
+
+

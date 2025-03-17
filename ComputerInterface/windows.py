@@ -32,12 +32,9 @@ class WindowsWorker:
             logging.error(e)
             return False
         return True
-    def debug(self):
-        result = subprocess.run("klist", shell=True, check=True, executable="/bin/bash")
 
     def establish_winrm_session(self, computer_fqdn):
         self.get_kerberos_ticket()
-        self.debug()
         user_with_principal = f"{self.user_name}@FYP.LOC"
         return winrm.Session(computer_fqdn, auth=(user_with_principal, self.password), transport="kerberos", server_cert_validation="ignore")
 

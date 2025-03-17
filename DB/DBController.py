@@ -43,7 +43,7 @@ class DBInterface(DBConnector):
             sql = """
             INSERT INTO computers (computer_id, computer_name, objectSid, ip_addr, operating_system) VALUES (?, ?, ?, ?, ?)
             """
-            self.cursor.execute(sql, (computer["computer_id"], computer["FQDN"], computer["objectSid"], computer["ip_addr"], computer["operating_system"]))
+            self.cursor.execute(sql, (computer["computer_id"], computer["FQDN"].upper(), computer["objectSid"], computer["ip_addr"], computer["operating_system"]))
             self.connection.commit()
             logging.info("Successfully added computer")
             return True
@@ -113,3 +113,52 @@ class DBInterface(DBConnector):
             return False
         else:
             return True
+
+    def get_computer_id(self, computer_name):
+        sql = """
+        SELECT computer_id FROM computers WHERE computer_name = ?
+        """
+        self.cursor.execute(sql, [computer_name])
+        data = self.cursor.fetchone()
+        if data is None:
+            logging.warning("Unable to find computer")
+            return False
+        return data[0]
+
+    def get_user_id(self, samAccountName):
+        sql = """
+        SELECT user_id FROM ad_users WHERE samAccountName = ?
+        """
+        self.cursor.execute(sql, [samAccountName])
+        data = self.cursor.fetchone()
+        if data is None:
+            logging.warning("Unable to find user")
+            return False
+        return data[0]
+
+    # NOTE: This function should only be run during setup when it has been checked that only authorised admins are on the computer
+    # All admins added via this function will be persistent
+    def setup_add_computer_admins(self, admin_list, computer_name, domain_netbios):
+        computer_id = self.get_computer_id(computer_name)
+        persistent = True
+        sql = """
+        INSERT INTO authorised_admins (computer_id, user_id, persistent, domain) VALUES (?, ?, ?, ?)
+        """
+        for admin in admin_list:
+            try:
+                if admin[:3] == domain_netbios:
+                    tmp = admin.split("\\")[-1]
+                    admin_user_id = self.get_user_id(tmp)
+                    domain_account = True
+                    self.cursor.execute(sql, (computer_id, admin_user_id, persistent, domain_account))
+                    self.connection.commit()
+                    logging.info("Successfully added admin")
+                else:
+                    domain_account = False
+                    admin_user_id = "LOCAL ACCOUNT"
+                    self.cursor.execute(sql, (computer_id, admin_user_id, persistent, domain_account))
+                    self.connection.commit()
+                    logging.info("Successfully added admin")
+            except sqlite3.OperationalError as error:
+                logging.error(f"{error}")
+                return False
