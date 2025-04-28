@@ -1,0 +1,73 @@
+{% extends "master.html" %}
+
+{% block content %}
+    <h1 class="text-center mb-4">Dashboard</h1>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Computer Information (left half) -->
+            <div class="col-md-6 p-3 border" style="background-color: #ffffff; color: black;">
+                <h3>Computer Information</h3>
+                <p>{{ computer_details["computer_name"] }}</p>
+            </div>
+
+            <!-- Right side: Admin controls and User list -->
+
+            <div class="col-md-6">
+                {% if session["admin"] %}
+                <!-- Admin only controls (small top section) -->
+                <div class="p-3 border" style="background-color: #ffffff; color: black;">
+                    <h5>Admin only controls</h5>
+                    <p>Only admins can see this...</p>
+                </div>
+                {% endif %}
+                <!-- User list (remaining part) -->
+                <div class="p-3 border" style="background: linear-gradient(#ffffff, #ffffff); color: black; height: 100%;">
+                    <h5>User List</h5>
+                    <table class="table">
+                        <thead class="thead-dark">
+                        <tr>
+                                <th scope="col">Username</th>
+                            <th scope="col">Permission</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in computer_details["users"] %}
+                                <tr>
+                                    <td>{{ user }}</td>
+                                    <td>Normal</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Full-width Session Information block -->
+        <div class="row">
+            <div class="col-12 p-3 border" style="background-color: #ffffff; color: black;">
+                <h3>Session Information</h3>
+                <table class="table">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Username</th>
+                            <th scope="col">Start Time</th>
+                            <th scope="col">Reason</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            {% for session in computer_details["sessions"] %}
+                                <tr>
+                                    <td>{{ session["username"] }}</td>
+                                    <td>{{ session["start_time"] }}</td>
+                                    <td>{{ session["reason"] }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,25 @@
+ body {
+            overflow-x: hidden;
+        }
+ .sidebar {
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 220px;
+            background-color: #343a40;
+            padding-top: 1rem;
+        }
+ .sidebar a {
+            color: white;
+            padding: 0.75rem 1rem;
+            display: block;
+            text-decoration: none;
+        }
+ .sidebar a:hover {
+            background-color: #495057;
+        }
+ .content {
+            margin-left: 220px;
+            padding: 2rem;
+        }
