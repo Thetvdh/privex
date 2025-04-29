@@ -2,3 +2,4 @@ testing
 .venv
 .idea
 domain_config.yaml
+static/css/bootstrap*
