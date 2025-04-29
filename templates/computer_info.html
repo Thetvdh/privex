@@ -9,6 +9,9 @@
             <div class="col-md-6 p-3 border" style="background-color: #ffffff; color: black;">
                 <h3>Computer Information</h3>
                 <p>{{ computer_details["computer_name"] }}</p>
+                <div class="align-content-end">
+                    <button type="button" class="btn btn-primary">Request Session</button>
+                </div>
             </div>
 
             <!-- Right side: Admin controls and User list -->
@@ -24,10 +27,11 @@
                 <!-- User list (remaining part) -->
                 <div class="p-3 border" style="background: linear-gradient(#ffffff, #ffffff); color: black; height: 100%;">
                     <h5>User List</h5>
-                    <table class="table">
+                <div class="table-responsive" style="max-height: 200px; overflow-y: auto">
+                    <table class="table mb-0">
                         <thead class="thead-dark">
                         <tr>
-                                <th scope="col">Username</th>
+                            <th scope="col">Username</th>
                             <th scope="col">Permission</th>
                         </tr>
                         </thead>
@@ -41,6 +45,7 @@
                         </tbody>
                     </table>
                 </div>
+                </div>
             </div>
         </div>
 
@@ -48,25 +53,26 @@
         <div class="row">
             <div class="col-12 p-3 border" style="background-color: #ffffff; color: black;">
                 <h3>Session Information</h3>
-                <table class="table">
-                        <thead class="thead-dark">
-                        <tr>
-                            <th scope="col">Username</th>
-                            <th scope="col">Start Time</th>
-                            <th scope="col">Reason</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            {% for session in computer_details["sessions"] %}
+                <div class="table-responsive" style="max-height: 300px; overflow-y: auto">
+                    <table class="table">
+                            <thead class="thead-dark">
                                 <tr>
-                                    <td>{{ session["username"] }}</td>
-                                    <td>{{ session["start_time"] }}</td>
-                                    <td>{{ session["reason"] }}</td>
+                                    <th scope="col">Username</th>
+                                    <th scope="col">Start Time</th>
+                                    <th scope="col">Reason</th>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-
+                            </thead>
+                            <tbody>
+                                {% for session in computer_details["sessions"] %}
+                                    <tr>
+                                        <td>{{ session["username"] }}</td>
+                                        <td>{{ session["start_time"] }}</td>
+                                        <td>{{ session["reason"] }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                </div>
             </div>
         </div>
     </div>
