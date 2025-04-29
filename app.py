@@ -25,12 +25,23 @@ def logout():
 
 @app.route('/computer/<computer_id>', methods=['GET', 'POST'])
 def computer(computer_id):
+
+    users = ["FYP\\Zythia",
+"FYP\\zythum",
+"FYP\\Zyzomys",
+"FYP\\Zyzzogeton",
+"FYP\\zyzzyva",
+"FYP\\zyzzyvas",
+"FYP\\ZZ",
+"FYP\\Zz",
+"FYP\\zZt",
+"FYP\\ZZZ"
+]
+
     mock_details = {
         "computer_name": "WINSERVFYP.FYP.LOC",
         "os": "Windows Server 2019",
-        "users": [
-            "FYP\\demoadmin", "FYP\\basic"
-        ],
+        "users": users,
         "sessions": [
             {
                 "username": "FYP\\demoadmin",
