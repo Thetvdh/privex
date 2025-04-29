@@ -41,6 +41,7 @@ def computer(computer_id):
     mock_details = {
         "computer_name": "WINSERVFYP.FYP.LOC",
         "os": "Windows Server 2019",
+        "ip_address": "192.168.1.10",
         "users": users,
         "sessions": [
             {

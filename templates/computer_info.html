@@ -6,11 +6,15 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Computer Information (left half) -->
-            <div class="col-md-6 p-3 border" style="background-color: #ffffff; color: black;">
-                <h3>Computer Information</h3>
-                <p>{{ computer_details["computer_name"] }}</p>
-                <div class="align-content-end">
-                    <button type="button" class="btn btn-primary">Request Session</button>
+            <div class="col-md-6 p-3 border d-flex flex-column" style="background-color: #ffffff; color: black;">
+                <div class="flex-grow-1">
+                    <h3>Computer Information</h3>
+                    <p><b>Computer Name: </b>{{ computer_details["computer_name"] }}</p>
+                    <p><b>Operating System: </b>{{ computer_details["os"] }}</p>
+                    <p><b>IP Address: </b>{{ computer_details["ip_address"] }}</p>
+                </div>
+                <div class="text-end mt-auto">
+                    <button type="button" class="btn btn-primary align-self-end">Request Session</button>
                 </div>
             </div>
 
