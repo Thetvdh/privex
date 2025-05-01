@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, abort
 import re
 import datetime
 import secrets
@@ -16,11 +16,24 @@ def home():  # put application's code here
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if request.method == "GET":
+        return render_template("login.html")
+
+    username = request.form.get('username')
+    password = request.form.get('password')
+    # Code to get valid users here, temporary values for now
+    if username == "admin" and password == "dud_password":
+        session["is_admin"] = True
+        session["username"] = username
+        return redirect(url_for('search'))
+    flash("Invalid username or password")
     return render_template("login.html")
 
 @app.route("/search", methods=['GET', 'POST'])
 def search():
 
+    if "username" not in session:
+        return redirect(url_for('login'))
     test_data = {
         "WINSERVFYP.FYP.LOC": "1",
         "LINSERVFYP.FYP.LOC": "2",
@@ -91,6 +104,7 @@ def session_manager():
 
 @app.route("/admin", methods=['GET', 'POST'])
 def admin():
+    admins = ["demoadmin"]
     if "username" not in session:
         return redirect(url_for('login'))
     if not session["is_admin"]:
@@ -98,9 +112,29 @@ def admin():
 
     # Code to add users to the website here
     if request.method == "POST":
-        return redirect(url_for("admin"))
+        username = request.form.get('username')
+        process = request.form.get('process')
 
+        if not username or not process:
+            flash("Failed to perform action")
+            return redirect(url_for('admin'))
 
+        if process == "add":
+
+            # Code for adding user to the platform here
+
+            flash(f"Successfully added {username} to users")
+            return redirect(url_for("admin"))
+        elif process == "remove":
+            # Check to ensure the currently logged in admin cannot be removed
+            if session["username"] != username:
+                flash(f"Successfully removed {username} from users")
+                return redirect(url_for("admin"))
+            flash(f"Unable to remove {username} as that is the currently logged in user")
+            return redirect(url_for("admin"))
+        else:
+            flash("Failed to perform action")
+            return redirect(url_for("admin"))
 
     return render_template("admin.html", admins=admins)
 

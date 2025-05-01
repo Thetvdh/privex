@@ -1,6 +1,32 @@
 {% extends "master.html" %}
 {% block content %}
+  <div class="container d-flex justify-content-center align-items-center">
+  <div class="text-center">
 
-    <h1>Test</h1>
+    <!-- Picture Placeholder -->
+    <div class="mb-4">
+      <img src="{{ url_for("static", filename="images/logo.png") }}" alt="privexlogo">
+    </div>
+
+    <!-- Login Form -->
+    <form method="POST" action="{{ url_for('login') }}">
+      <!-- Username -->
+      <div class="mb-3">
+        <input type="text" class="form-control text-black" name="username" placeholder="Username" style="background-color: #ffffff; border-radius: 10px;">
+      </div>
+
+      <!-- Password -->
+      <div class="mb-3">
+        <input type="password" class="form-control text-black" name="password" placeholder="Password" style="background-color: #ffffff; border-radius: 10px;">
+      </div>
+
+      <!-- Login Button -->
+      <button type="submit" class="btn btn-primary w-100">
+        Login
+      </button>
+    </form>
+
+  </div>
+</div>
 
 {% endblock %}
