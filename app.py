@@ -45,19 +45,19 @@ def logout():
 
 @app.route('/computer/<computer_id>', methods=['GET', 'POST'])
 def computer(computer_id):
-
-
+    if "username" not in session:
+        return redirect(url_for('login'))
     users = ["FYP\\Zythia",
-"FYP\\zythum",
-"FYP\\Zyzomys",
-"FYP\\Zyzzogeton",
-"FYP\\zyzzyva",
-"FYP\\zyzzyvas",
-"FYP\\ZZ",
-"FYP\\Zz",
-"FYP\\zZt",
-"FYP\\ZZZ"
-]
+        "FYP\\zythum",
+        "FYP\\Zyzomys",
+        "FYP\\Zyzzogeton",
+        "FYP\\zyzzyva",
+        "FYP\\zyzzyvas",
+        "FYP\\ZZ",
+        "FYP\\Zz",
+        "FYP\\zZt",
+        "FYP\\ZZZ"
+    ]
 
     mock_details = {
         "computer_name": "WINSERVFYP.FYP.LOC",
@@ -73,6 +73,13 @@ def computer(computer_id):
             }
         ]
     }
+    # POST when a user is added to the admin list of the machine
+    if request.method == "POST":
+        if not session["is_admin"]:
+            return redirect(url_for('computer', computer_id=computer_id))
+        # Code to add user to computer here
+
+
     return render_template("computer_info.html", computer_details=mock_details)
 
 @app.route("/session", methods=['GET', 'POST'])
