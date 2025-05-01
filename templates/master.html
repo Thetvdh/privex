@@ -16,10 +16,24 @@
     {% if session["is_admin"] %}
     <a href="{{ url_for('admin') }}">Admin</a>
     {% endif %}
+    {% if session["username"] %}
+    <a href="{{ url_for("logout") }}">Logout</a>
+    {% endif %}
 </div>
 
 <div class="content">
     {% block title %} {% endblock %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="row">
+                <ul class="list-group">
+                    {% for message in messages %}
+                        <li class="list-group-item list-group-item-primary">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        {% endwith %}
     {% block content %}
     {% endblock %}
 </div>
