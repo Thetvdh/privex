@@ -14,14 +14,14 @@
                     <p><b>IP Address: </b>{{ computer_details["ip_address"] }}</p>
                 </div>
                 <div class="text-end mt-auto">
-                    <button type="button" class="btn btn-primary align-self-end">Request Session</button>
+                    <button type="button" class="btn btn-primary align-self-end" data-bs-toggle="modal" data-bs-target="#reasonModal">Request Session</button>
                 </div>
             </div>
 
             <!-- Right side: Admin controls and User list -->
 
             <div class="col-md-6">
-                {% if session["admin"] %}
+                {% if session["is_admin"] %}
                 <!-- Admin only controls (small top section) -->
                 <div class="p-3 border" style="background-color: #ffffff; color: black;">
                     <h5>Admin only controls</h5>
@@ -63,6 +63,7 @@
                                 <tr>
                                     <th scope="col">Username</th>
                                     <th scope="col">Start Time</th>
+                                    <th scope="col">Expiry Time</th>
                                     <th scope="col">Reason</th>
                                 </tr>
                             </thead>
@@ -71,6 +72,7 @@
                                     <tr>
                                         <td>{{ session["username"] }}</td>
                                         <td>{{ session["start_time"] }}</td>
+                                        <td>{{ session["expiry_time"] }}</td>
                                         <td>{{ session["reason"] }}</td>
                                     </tr>
                                 {% endfor %}
@@ -79,5 +81,49 @@
                 </div>
             </div>
         </div>
+    <div class="modal fade" id="reasonModal" tabindex="-1" aria-labelledby="reasonModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reasonModalLabel">Reason</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <textarea id="reasonInput" class="form-control" rows="5" placeholder="Reason for session..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="submitReason" class="btn btn-success">Request</button>
+                </div>
+            </div>
+        </div>
+
     </div>
+    </div>
+    <script>
+        document.getElementById('submitReason').addEventListener('click', async () => {
+            const reasonText = document.getElementById('reasonInput').value;
+
+            try {
+                const response = await fetch('{{ url_for("session_manager") }}', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({reason: reasonText})
+                });
+
+                if(response.ok) {
+                    console.log("successfully sent request")
+                    const modalElement = document.getElementById('reasonModal')
+                    const modalInstance = bootstrap.Modal.getInstance(modalElement)
+                    modalInstance.hide()
+                    window.location.reload()
+                }
+                else {
+                    console.warn("Failed to send request")
+                }
+            }
+            catch (err) {
+                console.error("error: " + err.message)
+            }
+        });
+    </script>
 {% endblock %}
