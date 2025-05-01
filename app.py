@@ -89,6 +89,21 @@ def session_manager():
         print("Reason: ", reason)
     return "<h1>GET</h1>"
 
+@app.route("/admin", methods=['GET', 'POST'])
+def admin():
+    if "username" not in session:
+        return redirect(url_for('login'))
+    if not session["is_admin"]:
+        return redirect(url_for('search'))
+
+    # Code to add users to the website here
+    if request.method == "POST":
+        return redirect(url_for("admin"))
+
+
+
+    return render_template("admin.html", admins=admins)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

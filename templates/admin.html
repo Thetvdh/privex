@@ -1,0 +1,51 @@
+{% extends "master.html" %}
+
+{% block content %}
+
+<h1 class="text-center mb-4">User Management</h1>
+
+    <div class="container-fluid">
+        <div class="row">
+        <!-- Empty column to simulate spacing from the side navbar -->
+            <div class="col-md-2"></div>
+
+                <!-- Main content area -->
+                <div class="col-md-8">
+                    <!-- Add/Remove System Users section -->
+                    <div class="p-4 mb-3 text-black" style="background-color: #ffffff; color: black;">
+                        <h4 class="text-center">Add/Remove System Users</h4>
+                        <!-- Optional: Add form or controls here -->
+                        <form class="d-flex d" method="post" action="{{ url_for("admin") }}">
+                            <input name="username" class="form-control me-2" type="text" placeholder="Username..." aria-label="Username">
+                            <button class="btn btn-dark" type="submit">Search</button>
+                        </form>
+                    </div>
+
+                    <!-- All System Users section -->
+                    <div class="p-4 text-black" style="background-color: #ffffff; color: black;">
+                        <h4 class="text-center">All System Users</h4>
+                        <!-- Optional: List users or data table here -->
+                        <table class="table">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">Username</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for admin in admins %}
+                                    <tr>
+                                        <td>{{ admin }}</td>
+                                        <td><button>Remove</button></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            <!-- Optional empty column on the right -->
+            <div class="col-md-2"></div>
+        </div>
+    </div>
+{% endblock %}
