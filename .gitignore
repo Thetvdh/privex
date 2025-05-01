@@ -3,3 +3,4 @@ testing
 .idea
 domain_config.yaml
 static/css/bootstrap*
+static/js/bootstrap*
