@@ -1,8 +1,8 @@
 {% extends "master.html" %}
 
-{% block content %}
+{% block title %}<h1 class="text-center mb-4">User Management</h1>{% endblock %}
 
-<h1 class="text-center mb-4">User Management</h1>
+{% block content %}
 
     <div class="container-fluid">
         <div class="row">
@@ -17,6 +17,7 @@
                         <!-- Optional: Add form or controls here -->
                         <form class="d-flex d" method="post" action="{{ url_for("admin") }}">
                             <input name="username" class="form-control me-2" type="text" placeholder="Username..." aria-label="Username">
+                            <input name="process" type="hidden" value="add">
                             <button class="btn btn-dark" type="submit">Search</button>
                         </form>
                     </div>
@@ -36,7 +37,13 @@
                                 {% for admin in admins %}
                                     <tr>
                                         <td>{{ admin }}</td>
-                                        <td><button>Remove</button></td>
+                                        <td>
+                                            <form method="post" action="{{ url_for("admin") }}">
+                                                <input type="hidden" name="username" value="{{ admin }}">
+                                                <input type="hidden" name="process" value="remove">
+                                                <button type="submit" class="btn btn-danger">Remove</button>
+                                            </form>
+                                        </td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
