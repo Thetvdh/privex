@@ -5,12 +5,21 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Computer Information (left half) -->
-            <div class="col-md-6 p-3 border d-flex flex-column" style="background-color: #ffffff; color: black;">
+            <div class="col-md-6 p-3 border d-flex flex-column position-relative" style="background-color: #ffffff; color: black;">
                 <div class="flex-grow-1">
                     <h3>Computer Information</h3>
                     <p><b>Computer Name: </b>{{ computer_details["computer_name"] }}</p>
                     <p><b>Operating System: </b>{{ computer_details["os"] }}</p>
                     <p><b>IP Address: </b>{{ computer_details["ip_address"] }}</p>
+                    {% if "windows" in computer_details["os"].lower() %}
+                        <div>
+                            <img src="{{ url_for("static", filename="images/windows.png") }}" style="position: absolute;top: 1rem; right: 1rem; width: 90px; height: auto">
+                        </div>
+                    {% elif "linux" in computer_details["os"].lower() %}
+                        <div>
+                            <img src="{{ url_for("static", filename="images/linux.png") }}" style="position: absolute;top: 1rem; right: 1rem; width: 90px; height: auto">
+                        </div>
+                    {% endif %}
                 </div>
                 <div class="text-end mt-auto">
                     <button type="button" class="btn btn-primary align-self-end" data-bs-toggle="modal" data-bs-target="#reasonModal">Request Session</button>
@@ -23,8 +32,17 @@
                 {% if session["is_admin"] %}
                 <!-- Admin only controls (small top section) -->
                 <div class="p-3 border" style="background-color: #ffffff; color: black;">
-                    <h5>Admin only controls</h5>
-                    <p>Only admins can see this...</p>
+                    <h5>Add User to {{ computer_details["computer_name"] }}</h5>
+                    <form>
+                        <div class="row">
+                            <div class="col">
+                                <input name="username" class="form-control me-2" type="text" placeholder="Username..." aria-label="Username">
+                            </div>
+                            <div class="col">
+                                <button class="btn btn-primary form-control" type="submit">Add User</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
                 {% endif %}
                 <!-- User list (remaining part) -->
