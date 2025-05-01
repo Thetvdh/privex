@@ -1,10 +1,34 @@
 {% extends "master.html" %}
+
 {% block content %}
+    <h1 class="text-center mb-4">Search</h1>
 
-    <h1 class="text-center mb-4">Welcome Home</h1>
-    <div class="text-start">
-        <p>This is the homepage of your dashboard.</p>
-        <p>Everything here is aligned to the left, but the title above is centered.</p>
+    <div class="container-fluid">
+        <!-- Search bar block -->
+        <div class="row mb-3">
+            <div class="col-12 p-4 align-content-center" style="background-color: #ffffff; color: white;">
+                <form class="d-flex d" method="post" action="{{ url_for("search") }}">
+                    <input name="query" class="form-control me-2" type="search" placeholder="Search..." aria-label="Search">
+                    <button class="btn btn-dark" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Search results block -->
+        <div class="row">
+            <div class="col-12 p-4" style="background-color: #ffffff; color: black;">
+                <h4>Returned Search Results</h4>
+                <!-- Example result -->
+                {% if search_results %}
+                <ul class="list-group">
+                    {% for result in search_results %}
+                        <li class="list-group-item list-group-item-dark"><a href="{{ url_for("computer", computer_id=result[1]) }}">{{ result[0] }}</a></li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <h5>No results found</h5>
+                {% endif %}
+            </div>
+        </div>
     </div>
-
 {% endblock %}
