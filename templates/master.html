@@ -21,8 +21,12 @@
     <a href="{{ url_for('admin') }}">Admin</a>
     {% endif %}
     {% if session["username"] %}
+    <a href="{{ url_for("changepassword") }}">Change Password</a>
+    {% endif %}
+    {% if session["username"] %}
     <a href="{{ url_for("logout") }}">Logout</a>
     {% endif %}
+
 </div>
 
 <div class="content">

@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import re
 import datetime
 import secrets
+import time
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(64)
@@ -100,11 +101,61 @@ def session_manager():
     if request.method == "POST":
         reason = request.json.get("reason")
         print("Reason: ", reason)
-    return "<h1>GET</h1>"
+        return f"<h1>test</h1>"
+    return "<h1>GET</h1>", 200
 
 @app.route("/admin", methods=['GET', 'POST'])
 def admin():
-    admins = ["demoadmin"]
+    admins = ["aaliyah",
+"aaren",
+"aarika",
+"aaron",
+"aartjan",
+"aarushi",
+"abagael",
+"abagail",
+"abahri",
+"abbas",
+"abbe",
+"abbey",
+"abbi",
+"abbie",
+"abby",
+"abbye",
+"abdalla",
+"abdallah",
+"abdul",
+"abdullah",
+"abe",
+"abel",
+"abi",
+"abia",
+"abigael",
+"abigail",
+"abigale",
+"abra",
+"abraham",
+"abram",
+"abree",
+"abrianna",
+"abriel",
+"abrielle",
+"abu",
+"aby",
+"acacia",
+"access",
+"accounting",
+"ace",
+"achal",
+"achamma",
+"action",
+"ada",
+"adah",
+"adair",
+"adalia",
+"adaline",
+"adalyn",
+"adam",]
     if "username" not in session:
         return redirect(url_for('login'))
     if not session["is_admin"]:
@@ -137,6 +188,21 @@ def admin():
             return redirect(url_for("admin"))
 
     return render_template("admin.html", admins=admins)
+
+@app.route("/changepassword", methods=['GET', 'POST'])
+def changepassword():
+    if request.method == "GET":
+        return render_template("change_password.html")
+    user = session["username"]
+
+    data = request.form.get("password")
+
+    # Code to update password in database here
+    flash(f"Password successfully changed for user {user}")
+    session.clear()
+    return redirect(url_for("login"))
+
+
 
 
 if __name__ == '__main__':
