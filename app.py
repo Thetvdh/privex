@@ -172,8 +172,9 @@ def admin():
         if process == "add":
 
             # Code for adding user to the platform here
+            password = secrets.token_hex(8)
 
-            flash(f"Successfully added {username} to users")
+            flash(f"Successfully added {username} to users. Password set to {password}. Ask the user to update on first login!")
             return redirect(url_for("admin"))
         elif process == "remove":
             # Check to ensure the currently logged in admin cannot be removed
