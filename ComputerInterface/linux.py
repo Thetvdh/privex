@@ -4,6 +4,8 @@ import yaml
 import subprocess
 import logging
 
+from paramiko.ssh_exception import NoValidConnectionsError
+
 def load_config():
     with open("domain_config.yaml", "r") as config_file:
         ad_config = yaml.safe_load(config_file)
@@ -54,11 +56,16 @@ class LinuxWorker:
         username = f"{self.user_name}@{self.AD_CONFIG['DomainDNSName']}"
         computer = computer_name.lower()
         # print(username, computer, self.password)
-        client.connect(
-            hostname=computer,
-            username=username,
-            password=self.password
-        )
+        try:
+            client.connect(
+                hostname=computer,
+                username=username,
+                password=self.password
+            )
+        except NoValidConnectionsError as err:
+            logging.error(err)
+            print("Failed to establish connection to computer", err)
+            return False
         return client
     def close_connection(self, client):
         client.close()
