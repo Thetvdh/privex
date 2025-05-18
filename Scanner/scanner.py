@@ -1,3 +1,5 @@
+import datetime
+
 from ldap3.operation.compare import compare_response_to_dict
 
 from ComputerInterface.linux import LinuxWorker
@@ -203,3 +205,18 @@ def create_session(computer_fqdn, username, reason) -> str:
     if not result:
         return "Failed to create session due to database error"
     return f"Successfully created session for user {username} on computer {computer_fqdn}"
+
+
+def check_session_validity_computer(computer_fqdn, username):
+    sessions = database.get_non_expired_sessions_by_computer_and_user(computer_fqdn, username)
+    if not sessions:
+        return False  # Returns false as no valid session exists for that user
+    any_expired = False
+    for session in sessions:
+        expiry_time = datetime.datetime.strptime(session[4], "%Y-%m-%d %H:%M:%S.%f")
+        # If any have expired and there are multiple then all sessions need expiring. Should be 1 session per user per computer
+        if expiry_time < datetime.datetime.now() or any_expired:
+            any_expired = True
+            database.expire_session(session[0])  # Expires the session
+
+    return not any_expired
