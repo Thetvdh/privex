@@ -4,7 +4,7 @@ from ldap3.operation.compare import compare_response_to_dict
 
 from ComputerInterface.linux import LinuxWorker
 from ComputerInterface.windows import WindowsWorker
-from DB.DBController import DBInterface
+from DB import database
 from ADScripts.GetADInformation import LDAPController
 import logging
 
@@ -32,7 +32,8 @@ logging.basicConfig(
 )
 
 
-database = DBInterface()
+
+
 ldap_controller = LDAPController()
 
 

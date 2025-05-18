@@ -1,7 +1,7 @@
 import datetime
 
 from Scanner import scanner
-from DB.DBController import DBInterface
+from DB import database
 import yaml
 # admins = scanner.get_computer_admins_windows('WINSERVFYP.FYP.LOC')
 #
@@ -41,7 +41,7 @@ def main_loop():
     # Step 3
 
     # Get all computers
-    interface = DBInterface()
+    interface = database  # Because of refactoring this needs
     print("Getting DB computers")
     db_computers = interface.get_all_database_computers()
     print(db_computers)
@@ -231,3 +231,5 @@ if __name__ == '__main__':
     # print(sudoers)
     # result = scanner.remove_sudoer_linux("LINSERVFYP.FYP.LOC", "basic@FYP.LOC")
     # print(result)
+    # database = DBInterface()
+    # database.add_web_user("Jack", "password123", "jack")
