@@ -2,5 +2,7 @@ testing
 .venv
 .idea
 domain_config.yaml
+ADScripts/domain_config.yaml
 static/css/bootstrap*
 static/js/bootstrap*
+
