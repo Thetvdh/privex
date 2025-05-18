@@ -215,12 +215,15 @@ def changepassword():
         return render_template("change_password.html")
     user = session["username"]
 
-    data = request.form.get("password")
+    password = request.form.get("password")
 
     # Code to update password in database here
-    flash(f"Password successfully changed for user {user}")
-    session.clear()
-    return redirect(url_for("login"))
+    if database.reset_web_password(user, password):
+        flash(f"Password successfully changed for user {user}")
+        session.clear()
+        return redirect(url_for("login"))
+    flash(f"Failed to change password for user {user}")
+    return redirect(url_for("changepassword"))
 
 
 
