@@ -308,4 +308,42 @@ class DBInterface(DBConnector):
             print("Unable to create session in database.", error)
             return False
 
+    def get_all_sessions_db(self):
+        sql = """
+        SELECT computer_id, user_id, start_time, expiry_time, reason FROM sessions
+        """
+        self.cursor.execute(sql)
+        data = self.cursor.fetchall()
+        return data
 
+    def get_sessions_by_computer_db(self, computer_name) -> list:
+        sql = """
+        SELECT computer_id, user_id, start_time, expiry_time, reason, expired FROM sessions WHERE computer_id = ?
+        """
+        computer_id = self.get_computer_id(computer_name.upper())
+        if not computer_id:
+            print(f"Unable to get ID for computer {computer_name}")
+            return []
+        self.cursor.execute(sql, [computer_id])
+        data = self.cursor.fetchall()
+        return data
+
+    def get_non_expired_sessions_by_computer_and_user(self, computer_name, user_name) -> list:
+        sql = """
+        SELECT session_id, computer_id, user_id, start_time, expiry_time, reason, expired FROM sessions WHERE computer_id = ? AND user_id = ? AND expired = 0
+        """
+        computer_id = self.get_computer_id(computer_name)
+        user_id = self.get_user_id(user_name)
+        if not computer_id and not user_id:
+            print(f"Unable to get ID for computer {computer_name} or user {user_name}")
+            return []
+        self.cursor.execute(sql, [computer_id, user_id])
+        data = self.cursor.fetchall()
+        return data
+
+    def expire_session(self, session_id):
+        sql = """
+        UPDATE sessions SET expired = TRUE WHERE session_id = ?
+        """
+        self.cursor.execute(sql, [session_id])
+        self.connection.commit()
