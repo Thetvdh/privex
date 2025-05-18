@@ -1,3 +1,5 @@
+import hashlib
+import secrets
 import sqlite3
 import uuid
 import logging
@@ -26,7 +28,7 @@ class DBConnector:
     # Attempts SQLite database connection
     def establish_connection(self):
         try:
-            self.connection = sqlite3.connect(self.name)
+            self.connection = sqlite3.connect(self.name, check_same_thread=False)
             self.cursor = self.connection.cursor()
         except sqlite3.DatabaseError as error:
             logging.error(f"{error}")
@@ -354,3 +356,90 @@ class DBInterface(DBConnector):
         """
         self.cursor.execute(sql, [session_id])
         self.connection.commit()
+
+    # ==================
+    # All below here should be web app related
+
+    def add_web_user(self, user_name, password, samAccountName):
+        sql = """
+        INSERT INTO webapp_users (user_id, user_name, password, salt, ad_user_id, site_admin) VALUES (?, ?, ?, ?, ?, ?)
+        """
+        user_exists = self.get_web_user(user_name)
+        if user_exists:
+            print("User already exists")
+            return False
+        salt = secrets.token_urlsafe(16)
+        user_name = user_name.lower()
+        salted_password = password + salt
+
+        hashed_password = hashlib.sha512(salted_password.encode()).hexdigest()
+
+        ad_user_exists = self.get_user_id(samAccountName)
+        if not ad_user_exists:
+            print("AD does not exist")
+            return False
+
+        user_id = uuid.uuid4().hex
+        user_id_exists = self.get_web_user_from_id(user_id)
+        while user_id_exists:
+            user_id = uuid.uuid4().hex
+            user_id_exists = self.get_web_user_from_id(user_id)
+
+        try:
+            self.cursor.execute(sql, [user_id, user_name, hashed_password, salt, ad_user_exists, False])
+            self.connection.commit()
+            return True
+        except sqlite3.OperationalError as error:
+            logging.error(f"{error}")
+            print("Unable to create user in database.", error)
+            return False
+
+    def get_web_user_from_id(self, user_id):
+        try:
+            sql = """
+            SELECT user_id, user_name, password, salt, ad_user_id, site_admin FROM webapp_users WHERE user_id = ?
+            """
+            self.cursor.execute(sql, [user_id])
+            data = self.cursor.fetchall()
+            return data
+        except sqlite3.OperationalError as error:
+            logging.error(f"{error}")
+            print("Unable to get user in database.", error)
+            return []
+
+    def get_web_user(self, user_name):
+        try:
+            sql = """
+            SELECT user_id, password, salt, ad_user_id, site_admin FROM webapp_users WHERE user_name = ?
+            """
+            self.cursor.execute(sql, [user_name])
+            data = self.cursor.fetchone()
+            return data
+        except sqlite3.OperationalError as error:
+            logging.error(f"{error}")
+            print("Failed to get web user from database.")
+            return []
+
+    def remove_web_user(self, user_name):
+        pass
+
+    def reset_web_password(self, user_name, password):
+        salt = secrets.token_urlsafe(16)
+        salted_password = password + salt
+        hashed_password = hashlib.sha512(salted_password.encode()).hexdigest()
+
+        sql = """
+        UPDATE webapp_users SET password = ?, SALT = ? WHERE user_name = ?
+        """
+        try:
+            self.cursor.execute(sql, [hashed_password, salt, user_name])
+            self.connection.commit()
+            return True
+        except sqlite3.OperationalError as error:
+            logging.error(f"{error}")
+            print("Failed to reset web password.", error)
+            return False
+
+    def make_web_admin(self, user_name):
+        pass
+

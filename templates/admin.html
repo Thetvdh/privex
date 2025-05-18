@@ -17,6 +17,7 @@
                         <!-- Optional: Add form or controls here -->
                         <form class="d-flex d" method="post" action="{{ url_for("admin") }}">
                             <input name="username" class="form-control me-2" type="text" placeholder="Username..." aria-label="Username">
+                            <input name="ad_username" class="form-control me-2" type="text" placeholder="NetBIOS\username" aria-label="ad_username">
                             <input name="process" type="hidden" value="add">
                             <button class="btn btn-success" type="submit">Add</button>
                         </form>

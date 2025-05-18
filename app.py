@@ -2,11 +2,14 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import re
 import datetime
 import secrets
+from hashlib import sha512
+from DB.DBController import DBInterface
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(64)
-@app.route('/')
 
+database = DBInterface()
+@app.route('/')
 def home():  # put application's code here
 
     # temporary session setter
@@ -21,13 +24,23 @@ def login():
 
     username = request.form.get('username')
     password = request.form.get('password')
-    # Code to get valid users here, temporary values for now
-    if username == "admin" and password == "dud_password":
-        session["is_admin"] = True
-        session["username"] = username
+
+    db_user = database.get_web_user(username)
+    if not db_user:
+        flash("Invalid username or password")
+        return redirect(url_for('login'))
+
+    salt = db_user[2]
+    salted_password = password + salt
+    hashed_password = sha512(salted_password.encode()).hexdigest()
+    if hashed_password == db_user[1]:
+        session['username'] = username
+        session['is_admin'] = db_user[4]
         return redirect(url_for('search'))
-    flash("Invalid username or password")
-    return render_template("login.html")
+    else:
+        flash("Invalid username or password")
+        return redirect(url_for('login'))
+
 
 @app.route("/search", methods=['GET', 'POST'])
 def search():
@@ -163,6 +176,7 @@ def admin():
     # Code to add users to the website here
     if request.method == "POST":
         username = request.form.get('username')
+        ad_username = request.form.get('ad_username')
         process = request.form.get('process')
 
         if not username or not process:
@@ -173,14 +187,20 @@ def admin():
 
             # Code for adding user to the platform here
             password = secrets.token_hex(8)
-
-            flash(f"Successfully added {username} to users. Password set to {password}. Ask the user to update on first login!")
-            return redirect(url_for("admin"))
+            result = database.add_web_user(username, password, ad_username)
+            if result:
+                flash(f"Successfully added {username} to users. Password set to {password}. Ask the user to update on first login!")
+                return redirect(url_for("admin"))
+            else:
+                flash(f"Failed to add {username} to users. Potentially the username already exists or the AD user does not exist")
+                return redirect(url_for('admin'))
         elif process == "remove":
             # Check to ensure the currently logged in admin cannot be removed
             if session["username"] != username:
-                flash(f"Successfully removed {username} from users")
-                return redirect(url_for("admin"))
+                result = database.remove_web_user(username)
+                if result:
+                    flash(f"Successfully removed {username} from users")
+                    return redirect(url_for("admin"))
             flash(f"Unable to remove {username} as that is the currently logged in user")
             return redirect(url_for("admin"))
         else:
