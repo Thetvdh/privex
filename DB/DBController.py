@@ -150,6 +150,7 @@ class DBInterface(DBConnector):
         self.cursor.execute(sql, [computer_name])
         data = self.cursor.fetchone()
         if data is None:
+            print("Computer not found")
             logging.warning("Unable to find computer")
             return False
         return data[0]
@@ -162,6 +163,7 @@ class DBInterface(DBConnector):
         self.cursor.execute(sql, [samAccountName])
         data = self.cursor.fetchone()
         if data is None:
+            print("Unable to find user")
             logging.warning("Unable to find user")
             return False
         return data[0]
@@ -173,6 +175,7 @@ class DBInterface(DBConnector):
         self.cursor.execute(sql, [user_id])
         data = self.cursor.fetchone()
         if data is None:
+            print("Unable to find user")
             logging.warning("Unable to find user")
             return False
         return data[0]
@@ -196,16 +199,68 @@ class DBInterface(DBConnector):
                     self.cursor.execute(sql, (computer_id, admin_user_id, persistent, domain_account))
                     self.connection.commit()
                     logging.info("Successfully added admin")
+                    print("Successfully added admin")
                 else:
                     domain_account = False
                     admin_user_id = admin # Test how this works with removal from admins
                     self.cursor.execute(sql, (computer_id, admin_user_id, persistent, domain_account))
                     self.connection.commit()
                     logging.info("Successfully added admin")
+                    print("Successfully added admin")
             except sqlite3.OperationalError as error:
                 logging.error(f"{error}")
                 return False
 
+    def add_user_to_admin(self, user_name, computer_name, domain_netbios, persistent=False):
+        computer_id = self.get_computer_id(computer_name)
+        sql = """
+        INSERT INTO authorised_admins (computer_id, user_id, persistent, domain) VALUES (?, ?, ?, ?)
+        """
+        try:
+            if user_name[:3] == domain_netbios:
+                tmp = user_name.split("\\")[-1]
+                user_user_id = self.get_user_id(tmp)
+                domain_account = True
+                self.cursor.execute(sql, (computer_id, user_user_id, persistent, domain_account))
+                self.cursor.commit()
+                logging.info("Successfully added admin")
+            else:
+                domain_account = False
+                user_user_id = user_name
+                self.cursor.execute(sql, (computer_id, user_user_id, persistent, domain_account))
+                self.connection.commit()
+                logging.info("Successfully added admin")
+        except sqlite3.OperationalError as error:
+            logging.error(f"{error}")
+            return False
+
+    def remove_user_from_admin(self, user_name, computer_name) -> bool:
+        try:
+            computer_id = self.get_computer_id(computer_name)
+            user_id = self.get_user_id(user_name)
+            sql = """
+            DELETE FROM authorised_admins WHERE user_id = ? AND computer_id = ?
+            """
+            self.cursor.execute(sql, [user_id, computer_id])
+            self.connection.commit()
+            logging.info("Successfully removed admin")
+            return True
+        except sqlite3.OperationalError as error:
+            logging.error(f"{error}")
+            return False
+
+
+    def get_computer_info(self, computer_name):
+        sql = """
+        SELECT objectSid, ip_addr, operating_system FROM computers WHERE computer_name = ?
+        """
+        self.cursor.execute(sql, [computer_name])
+        data = self.cursor.fetchone()
+        if data is None:
+            logging.warning("Unable to find computer")
+            return False
+        else:
+            return data
 
     def get_computer_admins(self, computer_name) -> list:
 

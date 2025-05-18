@@ -109,7 +109,7 @@ class LinuxWorker:
             stdout.close()
             stderr.close()
             return False
-    def get_all_admins(self, client):
+    def get_all_admins(self, client) -> list:
         stdin, stdout, stderr = client.exec_command(f'getent group sudo')
         sudoers = stdout.read().decode().split(":")[-1].split(",")
         sanitised_sudoers = [i.strip() for i in sudoers]
