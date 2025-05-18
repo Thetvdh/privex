@@ -1,3 +1,5 @@
+from ldap3.operation.compare import compare_response_to_dict
+
 from ComputerInterface.linux import LinuxWorker
 from ComputerInterface.windows import WindowsWorker
 from DB.DBController import DBInterface
@@ -155,5 +157,38 @@ def remove_sudoer_linux(computer_fqdn, username):
         linux_interface.remove_from_sudo(session, username)
         return linux_interface.check_removed_from_sudo(session, username)
 
-def get_computer_info(computer_fqdn):
+def get_computer_info(computer_fqdn) -> bool | tuple:
     return database.get_computer_info(computer_fqdn)
+
+def create_session(computer_fqdn, username, reason) -> str:
+    """
+    Function to create session on a domain computer
+    1) Check user is permitted to elevate permissions on that computer
+    2) Check computer OS
+    3) Add user
+    4) Add session to database if useradd is successful
+    5) Return message to display to user
+    :param computer_fqdn:
+    :param username:
+    :param reason:
+    :return:
+    """
+    admins = database.get_computer_admins(computer_fqdn)
+    if not admins:
+        return "Failed to create session due to database error"
+    admins_dict = dict(admins)
+    if username not in admins_dict.keys():
+        return f"Insufficient permissions to create session for user {username}"
+
+    computer_info = get_computer_info(computer_fqdn)
+    if "windows" in computer_info[2].lower():
+        add_admin_windows(computer_fqdn, username)
+    elif "linux" in computer_info[2].lower():
+        add_sudoer_linux(computer_fqdn, username)
+    else:
+        return f"Failed to create session due to invalid OS for computer {computer_fqdn}"
+
+    result = database.create_session_db(computer_fqdn, username, reason)
+    if not result:
+        return "Failed to create session due to database error"
+    return f"Successfully created session for user {username} on computer {computer_fqdn}"

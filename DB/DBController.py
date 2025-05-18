@@ -1,7 +1,8 @@
 import sqlite3
 import uuid
 import logging
-from distutils.command.clean import clean
+import yaml
+import datetime
 
 logging.basicConfig(
     level=logging.INFO,
@@ -43,6 +44,8 @@ requests to and from the SQLite Database
 class DBInterface(DBConnector):
     def __init__(self):
         super().__init__()
+        with open("app_settings.yaml", "r") as yamlfile:
+            self.app_config = yaml.safe_load(yamlfile)
 
     # Adds a single computer to the database
     def add_computer(self, computer: dict):
@@ -250,7 +253,7 @@ class DBInterface(DBConnector):
             return False
 
 
-    def get_computer_info(self, computer_name):
+    def get_computer_info(self, computer_name) -> bool | tuple:
         sql = """
         SELECT objectSid, ip_addr, operating_system FROM computers WHERE computer_name = ?
         """
@@ -279,3 +282,30 @@ class DBInterface(DBConnector):
         for item in data:
             clean_list.append((item[0], item[1]))
         return clean_list
+
+    def create_session_db(self, computer_name, user_name, reason) -> bool:
+        sql = """
+        INSERT INTO sessions (computer_id, user_id, start_time, expiry_time, reason) VALUES (?, ?, ?, ?, ?)
+        """
+        computer_id = self.get_computer_id(computer_name)
+        if not computer_id:
+            logging.error("Failed to create session due to invalid computer")
+            return False
+        user_id = self.get_user_id(user_name)
+        if not user_id:
+            logging.error("Failed to create session due to invalid user")
+            return False
+        start_time = datetime.datetime.now()
+        expiry_time = start_time + datetime.timedelta(minutes=self.app_config["MAX_SESSION_LENGTH_MINS"])
+        try:
+            self.cursor.execute(sql, [computer_id, user_id, start_time, expiry_time, reason])
+            self.connection.commit()
+            logging.info("Successfully created session in database.")
+            print("Successfully created session in database.")
+            return True
+        except sqlite3.OperationalError as error:
+            logging.error(f"{error}")
+            print("Unable to create session in database.", error)
+            return False
+
+
