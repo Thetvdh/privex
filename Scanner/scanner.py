@@ -187,11 +187,16 @@ def create_session(computer_fqdn, username, reason) -> str:
     :param reason:
     :return:
     """
+    print("[DEBUG] Attempting to create session")
     admins = database.get_computer_admins(computer_fqdn)
     if not admins:
         return "Failed to create session due to database error"
     admins_dict = dict(admins)
-    if username not in admins_dict.keys():
+    print(admins_dict.keys())
+
+    user_id = database.get_user_id(username)
+
+    if user_id not in admins_dict.keys():
         return f"Insufficient permissions to create session for user {username}"
 
     computer_info = get_computer_info(computer_fqdn)

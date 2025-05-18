@@ -185,6 +185,7 @@ class DBInterface(DBConnector):
             return False
         return data[0]
 
+
     # NOTE: This function should only be run during setup when it has been checked that only authorised admins are on the computer
     # All admins added via this function will be persistent
     def setup_add_computer_admins(self, admin_list, computer_name, domain_netbios):
@@ -527,4 +528,33 @@ class DBInterface(DBConnector):
         except sqlite3.OperationalError as error:
             logging.error(f"{error}")
             print("Failed to get computer details from database.", error)
+            return []
+
+    def web_get_ad_name(self, user_name):
+        try:
+            sql = """
+            SELECT ad_user_id FROM webapp_users WHERE user_name = ?
+            """
+            self.cursor.execute(sql, [user_name])
+            data = self.cursor.fetchone()
+            return data[0]
+        except sqlite3.OperationalError as error:
+            logging.error(f"{error}")
+            print("Failed to get ad name from database.", error)
+            return []
+
+    def web_check_allowed_to_elevate(self, computer_id, ad_user_id):
+        try:
+            print("[DEBUG] TEsting if allowed to elevate")
+            sql = """
+            SELECT id FROM authorised_admins WHERE computer_id = ? AND user_id = ?
+            """
+
+            self.cursor.execute(sql, [computer_id, ad_user_id])
+            data = self.cursor.fetchone()
+            print("[DEBUG]", data)
+            return data
+        except sqlite3.OperationalError as error:
+            logging.error(f"{error}")
+            print("Failed check to elevate from database.", error)
             return []

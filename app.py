@@ -1,10 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, abort
 import re
-import datetime
 import secrets
 from hashlib import sha512
 from DB import database
 from ADScripts import ad_config
+from Scanner.scanner import create_session
 app = Flask(__name__)
 # app.secret_key = secrets.token_hex(64)
 app.secret_key = "TEMP"
@@ -13,9 +13,6 @@ app.secret_key = "TEMP"
 @app.route('/')
 def home():  # put application's code here
 
-    # temporary session setter
-    session["username"] = "admin"
-    session["is_admin"] = True # change when testing different features
     return redirect(url_for('search'))
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -110,7 +107,7 @@ def computer(computer_id):
         "os": computer_details[4],
         "ip_address": computer_details[3],
         "users": new_admins,
-        "sessions": sessions
+        "sessions": reversed(sessions)
     }
 
     # POST when a user is added to the admin list of the machine
@@ -150,13 +147,31 @@ def computer(computer_id):
 
     return render_template("computer_info.html", computer_details=details)
 
-@app.route("/session", methods=['GET', 'POST'])
+@app.route("/session", methods=['POST'])
 def session_manager():
     if request.method == "POST":
         reason = request.json.get("reason")
+        computer_fqdn = request.json.get("computer_name")
         print("Reason: ", reason)
-        return f"<h1>test</h1>"
-    return "<h1>GET</h1>", 200
+        web_session_name = session.get("username")  # Sessions username ie Jack
+        ad_user_id = database.web_get_ad_name(web_session_name) # ad_user_id for user_name in current session
+        ad_username = database.get_user_from_id(ad_user_id) # samAccountName for ad_user_id
+        computer_id = database.get_computer_id(computer_fqdn)
+        if not ad_username:
+            print("Invalid username")
+            abort(500)
+
+        print("[DEBUG]", web_session_name, ad_user_id, computer_id)
+        if database.web_check_allowed_to_elevate(computer_id, ad_user_id):
+            print("[DEBUG] Passed test")
+            output = create_session(computer_fqdn, ad_username, reason)
+            print("[DEBUG]", output)
+            return "Successfully created session", 200
+        else:
+            print("Not allowed to elevate")
+            abort(500)
+    return "Server Error", 500
+
 
 @app.route("/admin", methods=['GET', 'POST'])
 def admin():
