@@ -1,3 +1,5 @@
+import datetime
+
 from Scanner import scanner
 from DB.DBController import DBInterface
 import yaml
@@ -109,12 +111,13 @@ def cli():
     print("1) Add admin")
     print("2) Remove admin")
     print("3) List admins")
-    print("4) Exit")
+    print("4) Create Session (DB Entry)")
+    print("5) Exit")
 
     choice = input("Enter your choice: ")
-    while choice not in ["1", "2", "3", "4"]:
+    while choice not in ["1", "2", "3", "4", "5"]:
         choice = input("Enter your choice: ")
-    if choice == "4":
+    if choice == "5":
         exit()
     if choice == "1":
         computer_name = input("Enter computer name: ")
@@ -169,6 +172,9 @@ def cli():
                 print(f"Admins on {computer_name}", ", ".join(admins))
             else:
                 print("Unable to get admins from computer")
+    elif choice == "4":
+        database = DBInterface()
+        database.create_session_db("WINSERVFYP.FYP.LOC", "FYP\\basic", "Software Upgrade")
 
 def setup():
     computers = scanner.get_computers()
@@ -186,9 +192,9 @@ def setup():
             print(f"Invalid OS on {computer['FQDN']}")
 
 if __name__ == '__main__':
-    # cli()
+    cli()
     # setup()
-    main_loop()
+    # main_loop()
     # sudoers = scanner.get_computer_admins_linux("LINSERVFYP.FYP.LOC")
     # print(sudoers)
     # result = scanner.add_sudoer_linux("LINSERVFYP.FYP.LOC", "basic@FYP.LOC")
