@@ -80,9 +80,16 @@ def main_loop():
         for user in admins_from_computer_database_ids:
             # User should be in the admin list, no issue
             admins_from_db_dict = dict(admins_from_db)
-            # TODO add valid session check
+
+            print(computer[0], interface.get_user_from_id(user))
+            # Checks if the user is in the database and persistent
             if user in admins_from_db_dict.keys() and admins_from_db_dict.get(user):
                 print(f"User {user} is a valid admin")
+                # Checks if the user is persistent
+            elif not admins_from_db_dict.get(user) and scanner.check_session_validity_computer(computer[0], interface.get_user_from_id(user)):
+                # Check if user has a valid session
+                print(f"User {user} is a valid admin")
+
             # removes invalid admins
             else:
                 print(f"User {user} is not a valid admin")
@@ -112,13 +119,13 @@ def cli():
     print("2) Remove admin")
     print("3) List admins")
     print("4) Create Session (DB Entry)")
-    print("5) Exit")
-
+    print("5) List all sessions")
+    print("6) Get session by computer")
+    print("7) Add admin (DB Entry)")
+    database = DBInterface()
     choice = input("Enter your choice: ")
-    while choice not in ["1", "2", "3", "4", "5"]:
+    while choice not in ["1", "2", "3", "4", "5", "6", "7"]:
         choice = input("Enter your choice: ")
-    if choice == "5":
-        exit()
     if choice == "1":
         computer_name = input("Enter computer name: ")
         computer_info = scanner.get_computer_info(computer_name)
@@ -173,8 +180,27 @@ def cli():
             else:
                 print("Unable to get admins from computer")
     elif choice == "4":
-        database = DBInterface()
-        database.create_session_db("WINSERVFYP.FYP.LOC", "FYP\\basic", "Software Upgrade")
+
+        computer_name = input("Enter computer name: ")
+        user_name = input("Enter username: ")
+        reason = input("Enter reason: ")
+        database.create_session_db(computer_name, user_name, reason)
+    elif choice == "5":
+        sessions = database.get_all_sessions_db()
+        print(sessions)
+    elif choice == "6":
+        computer_name = input("Enter computer name: ")
+        sessions = database.get_sessions_by_computer_db(computer_name)
+        print(sessions)
+    elif choice == "7":
+        # computer_name = input("Enter computer name: ")
+        # user_name = input("Enter username: ")
+        computer_name = "WINSERVFYP.FYP.LOC"
+        user_name = "FYP\\basic"
+        if database.add_user_to_admin(user_name, computer_name, "FYP"):
+            print(f"Successfully added user to admin {user_name}")
+
+
 
 def setup():
     computers = scanner.get_computers()
@@ -192,9 +218,9 @@ def setup():
             print(f"Invalid OS on {computer['FQDN']}")
 
 if __name__ == '__main__':
-    cli()
+    # cli()
     # setup()
-    # main_loop()
+    main_loop()
     # sudoers = scanner.get_computer_admins_linux("LINSERVFYP.FYP.LOC")
     # print(sudoers)
     # result = scanner.add_sudoer_linux("LINSERVFYP.FYP.LOC", "basic@FYP.LOC")
