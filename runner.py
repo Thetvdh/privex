@@ -46,22 +46,22 @@ def main_loop():
     # Get admin list for each computer
     for computer in db_computers:
         # Get admin list from computer itself (windows)
-        if "Windows" in computer[1]:
+        if "windows" in computer[1].lower():
             print(f"Getting windows admins from {computer[0]}")
             admins_from_computer = scanner.get_computer_admins_windows(computer[0])
             print(admins_from_computer)
-        else:
+
+        elif "linux" in computer[1].lower():
             print(f"Getting Linux admins from {computer[0]}")
             admins_from_computer = scanner.get_computer_admins_linux(computer[0])
             print(admins_from_computer)
-        if not admins_from_computer:
+        else:
             continue
         # Get admin list from db
         print("Getting admins from DB")
         admins_from_db = interface.get_computer_admins(computer[0])
         print(f"Computer: {computer}\nAdmin List: {admins_from_computer}\nAdmin List (DB): {admins_from_db}")
-
-        # Convert admin from windows to IDs
+        # Convert admin username from windows to IDs
         admins_from_computer_database_ids = []
         for admin in admins_from_computer:
             if admin[:3] == ad_config["DomainNetBIOSName"]:
@@ -71,12 +71,17 @@ def main_loop():
             else:
                 # If the account is a local account then it will be added using its FQDN as it will not have a database ID
                 admins_from_computer_database_ids.append(admin)
+        # Prints admins IDs
         print(f"Admin List ID (Database from Windows): {admins_from_computer_database_ids}")
-        # Compare lists
+        # Compare lists between known good in database and data from computers
+
         for user in admins_from_computer_database_ids:
             # User should be in the admin list, no issue
-            if user in admins_from_db:
+            admins_from_db_dict = dict(admins_from_db)
+            # TODO add valid session check
+            if user in admins_from_db_dict.keys() and admins_from_db_dict.get(user):
                 print(f"User {user} is a valid admin")
+            # removes invalid admins
             else:
                 print(f"User {user} is not a valid admin")
                 # remove invalid admin from target

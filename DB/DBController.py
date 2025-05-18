@@ -271,11 +271,11 @@ class DBInterface(DBConnector):
         computer_id = self.cursor.fetchone()[0]
 
         sql_admins = """
-        SELECT user_id FROM authorised_admins WHERE computer_id = ?
+        SELECT user_id, persistent FROM authorised_admins WHERE computer_id = ?
         """
         self.cursor.execute(sql_admins, [computer_id])
         data = self.cursor.fetchall()
         clean_list = []
         for item in data:
-            clean_list.append(item[0])
+            clean_list.append((item[0], item[1]))
         return clean_list
