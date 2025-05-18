@@ -53,7 +53,7 @@ def search():
 
         search_results = dict(search_results)
         print(" FROM DB ", search_results)
-        r = re.compile(computer_name, re.IGNORECASE)
+        r = re.compile(re.escape(computer_name), re.IGNORECASE)
 
         search_results_final = [(key, value) for key, value in search_results.items() if r.search(key)]
         print(" AFTER RE ", search_results_final)
