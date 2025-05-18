@@ -1,5 +1,3 @@
-import datetime
-
 from Scanner import scanner
 from DB import database
 import yaml
@@ -41,7 +39,7 @@ def main_loop():
     # Step 3
 
     # Get all computers
-    interface = database  # Because of refactoring this needs
+    interface = database  # Because of refactoring this needs to be assigned here as well
     print("Getting DB computers")
     db_computers = interface.get_all_database_computers()
     print(db_computers)
@@ -124,7 +122,7 @@ def cli():
     print("5) List all sessions")
     print("6) Get session by computer")
     print("7) Add admin (DB Entry)")
-    database = DBInterface()
+
     choice = input("Enter your choice: ")
     while choice not in ["1", "2", "3", "4", "5", "6", "7"]:
         choice = input("Enter your choice: ")
@@ -206,7 +204,7 @@ def cli():
 
 def setup():
     computers = scanner.get_computers()
-    interface = DBInterface()
+    interface = database
     for computer in computers:
         if "windows" in computer["operating_system"].lower():
             admins = scanner.get_computer_admins_windows(computer["FQDN"])
@@ -220,16 +218,4 @@ def setup():
             print(f"Invalid OS on {computer['FQDN']}")
 
 if __name__ == '__main__':
-    # cli()
-    # setup()
     main_loop()
-    # sudoers = scanner.get_computer_admins_linux("LINSERVFYP.FYP.LOC")
-    # print(sudoers)
-    # result = scanner.add_sudoer_linux("LINSERVFYP.FYP.LOC", "basic@FYP.LOC")
-    # print(result)
-    # sudoers = scanner.get_computer_admins_linux("LINSERVFYP.FYP.LOC")
-    # print(sudoers)
-    # result = scanner.remove_sudoer_linux("LINSERVFYP.FYP.LOC", "basic@FYP.LOC")
-    # print(result)
-    # database = DBInterface()
-    # database.add_web_user("Jack", "password123", "jack")
