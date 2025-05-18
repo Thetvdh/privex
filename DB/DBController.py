@@ -146,7 +146,7 @@ class DBInterface(DBConnector):
             return True
 
     # requests the computer ID from the database based off the FQDN
-    def get_computer_id(self, computer_name):
+    def get_computer_id(self, computer_name) -> bool | str:
         sql = """
         SELECT computer_id FROM computers WHERE computer_name = ?
         """
@@ -219,20 +219,23 @@ class DBInterface(DBConnector):
         sql = """
         INSERT INTO authorised_admins (computer_id, user_id, persistent, domain) VALUES (?, ?, ?, ?)
         """
+        print(user_name, computer_name, domain_netbios)
         try:
             if user_name[:3] == domain_netbios:
                 tmp = user_name.split("\\")[-1]
                 user_user_id = self.get_user_id(tmp)
                 domain_account = True
                 self.cursor.execute(sql, (computer_id, user_user_id, persistent, domain_account))
-                self.cursor.commit()
+                self.connection.commit()
                 logging.info("Successfully added admin")
+                return True
             else:
                 domain_account = False
                 user_user_id = user_name
                 self.cursor.execute(sql, (computer_id, user_user_id, persistent, domain_account))
                 self.connection.commit()
                 logging.info("Successfully added admin")
+                return True
         except sqlite3.OperationalError as error:
             logging.error(f"{error}")
             return False
@@ -285,20 +288,24 @@ class DBInterface(DBConnector):
 
     def create_session_db(self, computer_name, user_name, reason) -> bool:
         sql = """
-        INSERT INTO sessions (computer_id, user_id, start_time, expiry_time, reason) VALUES (?, ?, ?, ?, ?)
+        INSERT INTO sessions (computer_id, user_id, start_time, expiry_time, reason, expired) VALUES (?, ?, ?, ?, ?, ?)
         """
         computer_id = self.get_computer_id(computer_name)
         if not computer_id:
             logging.error("Failed to create session due to invalid computer")
+            print("Failed to create session due to invalid computer")
             return False
+        user_name = user_name.split("\\")[-1]
         user_id = self.get_user_id(user_name)
+        print(f"Username | UserID : {user_name} | {user_id}")
         if not user_id:
             logging.error("Failed to create session due to invalid user")
+            print("Failed to create session due to invalid user")
             return False
         start_time = datetime.datetime.now()
         expiry_time = start_time + datetime.timedelta(minutes=self.app_config["MAX_SESSION_LENGTH_MINS"])
         try:
-            self.cursor.execute(sql, [computer_id, user_id, start_time, expiry_time, reason])
+            self.cursor.execute(sql, [computer_id, user_id, start_time, expiry_time, reason, False])
             self.connection.commit()
             logging.info("Successfully created session in database.")
             print("Successfully created session in database.")
