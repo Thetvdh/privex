@@ -3,12 +3,10 @@ import re
 import datetime
 import secrets
 from hashlib import sha512
-from DB.DBController import DBInterface
-
+from DB import database
 app = Flask(__name__)
-app.secret_key = secrets.token_hex(64)
-
-database = DBInterface()
+# app.secret_key = secrets.token_hex(64)
+app.secret_key = "TEMP"
 @app.route('/')
 def home():  # put application's code here
 
@@ -44,24 +42,24 @@ def login():
 
 @app.route("/search", methods=['GET', 'POST'])
 def search():
-
+    search_results_final = []
     if "username" not in session:
         return redirect(url_for('login'))
-    test_data = {
-        "WINSERVFYP.FYP.LOC": "1",
-        "LINSERVFYP.FYP.LOC": "2",
-        "FYPDC.FYP.LOC": "3"
-    }
 
-    if request.method == "GET":
-        return render_template("search.html")
-    query = request.form.get("query")
-    r = re.compile(query, re.IGNORECASE)
-    search_results = [(key, value) for key, value in test_data.items() if r.search(key)]
-    if len(search_results) == 0:
-        search_results = False
+    if request.method == "POST":
+        computer_name = request.form.get("query")
 
-    return render_template("search.html", search_results=search_results)
+        search_results = database.web_get_all_database_computers()
+
+        search_results = dict(search_results)
+        print(" FROM DB ", search_results)
+        r = re.compile(computer_name, re.IGNORECASE)
+
+        search_results_final = [(key, value) for key, value in search_results.items() if r.search(key)]
+        print(" AFTER RE ", search_results_final)
+
+
+    return render_template("search.html", search_results=search_results_final)
 
 @app.route('/logout')
 def logout():
@@ -118,56 +116,6 @@ def session_manager():
 
 @app.route("/admin", methods=['GET', 'POST'])
 def admin():
-    admins = ["aaliyah",
-"aaren",
-"aarika",
-"aaron",
-"aartjan",
-"aarushi",
-"abagael",
-"abagail",
-"abahri",
-"abbas",
-"abbe",
-"abbey",
-"abbi",
-"abbie",
-"abby",
-"abbye",
-"abdalla",
-"abdallah",
-"abdul",
-"abdullah",
-"abe",
-"abel",
-"abi",
-"abia",
-"abigael",
-"abigail",
-"abigale",
-"abra",
-"abraham",
-"abram",
-"abree",
-"abrianna",
-"abriel",
-"abrielle",
-"abu",
-"aby",
-"acacia",
-"access",
-"accounting",
-"ace",
-"achal",
-"achamma",
-"action",
-"ada",
-"adah",
-"adair",
-"adalia",
-"adaline",
-"adalyn",
-"adam",]
     if "username" not in session:
         return redirect(url_for('login'))
     if not session["is_admin"]:
@@ -203,10 +151,19 @@ def admin():
                     return redirect(url_for("admin"))
             flash(f"Unable to remove {username} as that is the currently logged in user")
             return redirect(url_for("admin"))
+
+        elif process == "make_admin":
+            username = request.form.get('username')
+            database.make_web_admin(username)
+
         else:
             flash("Failed to perform action")
             return redirect(url_for("admin"))
 
+
+
+    raw_admins = database.get_all_web_users()
+    admins = [admin[1] for admin in raw_admins]
     return render_template("admin.html", admins=admins)
 
 @app.route("/changepassword", methods=['GET', 'POST'])

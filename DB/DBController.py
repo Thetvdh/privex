@@ -421,7 +421,19 @@ class DBInterface(DBConnector):
             return []
 
     def remove_web_user(self, user_name):
-        pass
+        sql = """
+        DELETE FROM webapp_users WHERE user_name = ?
+        """
+        try:
+            self.cursor.execute(sql, [user_name])
+            self.connection.commit()
+            return True
+        except sqlite3.OperationalError as error:
+            logging.error(f"{error}")
+            print("Failed to remove web user from database.")
+            return False
+
+
 
     def reset_web_password(self, user_name, password):
         salt = secrets.token_urlsafe(16)
@@ -441,5 +453,58 @@ class DBInterface(DBConnector):
             return False
 
     def make_web_admin(self, user_name):
-        pass
+        sql = """
+        UPDATE webapp_users SET site_admin = 1 WHERE user_name = ?
+        """
 
+        try:
+            self.cursor.execute(sql, [user_name])
+            self.connection.commit()
+            print(f"Updated user {user_name} to web admin")
+            return True
+        except sqlite3.OperationalError as error:
+            logging.error(f"{error}")
+            print("Failed to make web admin for database.", error)
+            return False
+
+    def get_all_web_admins(self):
+        try:
+            sql = """
+            SELECT user_id, user_name, password, salt, ad_user_id, site_admin FROM webapp_users WHERE site_admin = 1
+            """
+
+            self.cursor.execute(sql)
+            data = self.cursor.fetchall()
+            return data
+        except sqlite3.OperationalError as error:
+            logging.error(f"{error}")
+            print("Failed to get web admins from database.", error)
+            return []
+
+    def get_all_web_users(self):
+        try:
+            sql = """
+            SELECT user_id, user_name, password, salt, ad_user_id, site_admin FROM webapp_users
+            """
+            self.cursor.execute(sql)
+            data = self.cursor.fetchall()
+            return data
+        except sqlite3.OperationalError as error:
+            logging.error(f"{error}")
+            print("Failed to get web users from database.", error)
+            return []
+
+    def web_get_all_database_computers(self):
+        try:
+            sql = """
+            SELECT computer_name, computer_id FROM computers
+            """
+
+            self.cursor.execute(sql)
+            data = self.cursor.fetchall()
+            clean_data = [computer[0] for computer in data]
+            return data
+        except sqlite3.OperationalError as error:
+            logging.error(f"{error}")
+            print("Failed to get computers from database.", error)
+            return []
