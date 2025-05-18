@@ -226,3 +226,11 @@ def check_session_validity_computer(computer_fqdn, username):
             database.expire_session(session[0])  # Expires the session
 
     return not any_expired
+
+def end_windows_rdp_session(computer_name, username):
+    worker = WindowsWorker()
+    session = worker.establish_winrm_session(computer_name)
+    if worker.end_rdp_session(session, username):
+        print("Successfully ended RDP session")
+        return True
+    return False

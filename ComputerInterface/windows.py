@@ -1,3 +1,5 @@
+from operator import indexOf
+
 import requests
 import winrm
 import yaml
@@ -152,3 +154,34 @@ class WindowsWorker:
         if username not in admins:
             return True
         return False
+
+    def end_rdp_session(self, session, username):
+        try:
+            response = session.run_ps("qwinsta")
+            data = response.std_out.decode()
+
+            elements = data.split(" ")
+            clean_elements = list(filter(None, elements))
+            # print(clean_elements)
+            if username in clean_elements:
+                session_id = clean_elements[clean_elements.index(username)+1]
+                print(session_id)
+                r = session.run_ps(f"logoff {session_id}")
+                if r.status_code == 0:
+                    logging.info(f"Successfully logoff {session_id}")
+                    print(f"Successfully logoff {session_id}")
+                    return True
+                else:
+                    logging.warning(f"Failed to logoff {session_id}")
+                    return False
+            else:
+                logging.error(f"No session for {username}")
+                return False
+        except requests.exceptions.ConnectTimeout as e:
+            logging.error(e)
+            print(e)
+            return False
+        except requests.exceptions.ConnectionError as e:
+            logging.error(e)
+            print(e)
+            return False
