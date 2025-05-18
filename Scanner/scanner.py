@@ -33,7 +33,14 @@ logging.basicConfig(
 database = DBInterface()
 ldap_controller = LDAPController()
 
+
+
+
 def get_computers():
+    if not ldap_controller.conn:
+        print("Unable to get ldap controller connection")
+        logging.error("Unable to get ldap controller connection")
+        return []
     computers = ldap_controller.get_ad_computers()
     return computers
 
@@ -41,21 +48,25 @@ def get_computers():
 def add_computers():
     computers = get_computers()
     for computer in computers:
-        if database.check_unique_computer_sid(computer["objectSid"]):
+        if database.check_unique_computer_sid(computer.get("objectSid")):
             logging.info(f"Computer {computer['FQDN']} already exists")
             continue
         if not database.add_computer(computer):
-            logging.error(f"Failed to add computer {computer['FQDN']}")
+            logging.error(f"Failed to add computer {computer.get('FQDN')}")
 
 
 def get_users():
+    if not ldap_controller.conn:
+        print("Unable to get ldap controller connection")
+        logging.error("Unable to get ldap controller connection")
+        return []
     users = ldap_controller.get_ad_users()
     return users
 
 def add_users():
     users = get_users()
     for user in users:
-        if database.check_unique_user_sid(user["objectSid"]):
+        if database.check_unique_user_sid(user.get("objectSid")):
             logging.info(f"User {user['samAccountName']} already exists")
             continue
         if not database.add_user(user):
