@@ -5,11 +5,11 @@ users to have Local Administrator access when required.
 
 # Features
 
-- Scanner to remove unauthorised admin accounts from computers - ⌛
+- Scanner to remove unauthorised admin accounts from computers - ✅
 - Ability to temporarily elevate a Domain User account to Local Administrator - ⌛
-- Customisable Administrator session length - ⌛
+- Customisable Administrator session length - ✅
 - Forcefully ends sessions upon their Administrator privileges being revoked - ⌛
-- User-friendly frontend to interact with the solution - ⌛
+- User-friendly frontend to interact with the solution - ✅
 - Support for Windows and Linux Operating Systems - ⌛
 
 
