@@ -89,6 +89,8 @@ def main_loop():
             elif not admins_from_db_dict.get(user) and scanner.check_session_validity_computer(computer[0], interface.get_user_from_id(user)):
                 # Check if user has a valid session
                 print(f"User {user} is a valid admin")
+            elif "windows" in computer[1].lower() and "Administrator" in user:
+                print("This is the built in administrator user, skipping")
 
             # removes invalid admins
             else:
