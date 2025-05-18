@@ -3,7 +3,7 @@ import json
 import yaml
 import socket
 
-from ldap3.core.exceptions import LDAPBindError
+from ldap3.core.exceptions import LDAPBindError, LDAPSocketOpenError
 
 
 def load_config():
@@ -35,6 +35,9 @@ class LDAPController:
             return conn
         except LDAPBindError as e:
             print("[ERROR] Unable to bind to LDAP server", e)
+            return False
+        except LDAPSocketOpenError as e:
+            print("[ERROR] Unable to connect to LDAP server", e)
             return False
 
 
