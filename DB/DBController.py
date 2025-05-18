@@ -218,6 +218,10 @@ class DBInterface(DBConnector):
 
     def add_user_to_admin(self, user_name, computer_name, domain_netbios, persistent=False):
         computer_id = self.get_computer_id(computer_name)
+        if not computer_id:
+            logging.warning("Unable to find computer")
+            print(f"unable to find computer {computer_name}")
+            return False
         sql = """
         INSERT INTO authorised_admins (computer_id, user_id, persistent, domain) VALUES (?, ?, ?, ?)
         """
@@ -230,6 +234,7 @@ class DBInterface(DBConnector):
                 self.cursor.execute(sql, (computer_id, user_user_id, persistent, domain_account))
                 self.connection.commit()
                 logging.info("Successfully added admin")
+                print("Successfully added admin")
                 return True
             else:
                 domain_account = False
@@ -237,6 +242,7 @@ class DBInterface(DBConnector):
                 self.cursor.execute(sql, (computer_id, user_user_id, persistent, domain_account))
                 self.connection.commit()
                 logging.info("Successfully added admin")
+                print("Successfully added local admin")
                 return True
         except sqlite3.OperationalError as error:
             logging.error(f"{error}")
@@ -246,6 +252,8 @@ class DBInterface(DBConnector):
         try:
             computer_id = self.get_computer_id(computer_name)
             user_id = self.get_user_id(user_name)
+            if not user_id:
+                user_id = user_name
             sql = """
             DELETE FROM authorised_admins WHERE user_id = ? AND computer_id = ?
             """
@@ -507,4 +515,16 @@ class DBInterface(DBConnector):
         except sqlite3.OperationalError as error:
             logging.error(f"{error}")
             print("Failed to get computers from database.", error)
+            return []
+    def web_get_computer_details(self, computer_id):
+        try:
+            sql = """
+            SELECT computer_id, computer_name, objectSid, ip_addr, operating_system FROM computers WHERE computer_id = ?
+            """
+            self.cursor.execute(sql, [computer_id])
+            data = self.cursor.fetchone()
+            return data
+        except sqlite3.OperationalError as error:
+            logging.error(f"{error}")
+            print("Failed to get computer details from database.", error)
             return []

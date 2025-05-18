@@ -33,10 +33,11 @@
                 <!-- Admin only controls (small top section) -->
                 <div class="p-3 border" style="background-color: #ffffff; color: black;">
                     <h5>Add User to {{ computer_details["computer_name"] }}</h5>
-                    <form>
+                    <form method="POST" action="{{ url_for("computer", computer_id=computer_details["computer_id"]) }}">
                         <div class="row">
                             <div class="col">
                                 <input name="username" class="form-control me-2" type="text" placeholder="Username..." aria-label="Username">
+                                <input name="process" type="hidden" value="add">
                             </div>
                             <div class="col">
                                 <button class="btn btn-primary form-control" type="submit">Add User</button>
@@ -54,13 +55,25 @@
                         <tr>
                             <th scope="col">Username</th>
                             <th scope="col">Permission</th>
+                            <th scope="col">Action</th>
                         </tr>
                         </thead>
                         <tbody>
                             {% for user in computer_details["users"] %}
                                 <tr>
-                                    <td>{{ user }}</td>
-                                    <td>Normal</td>
+                                    <td>{{ user["username"] }}</td>
+                                    {% if user["persistent"] %}
+                                        <td>Persistent</td>
+                                    {% else %}
+                                        <td>Regular</td>
+                                    {% endif %}
+                                    <td>
+                                         <form method="POST" action="{{ url_for("computer", computer_id=computer_details["computer_id"]) }}">
+                                            <input name="process" type="hidden" value="remove">
+                                            <input name="username" type="hidden" value="{{ user["username"] }}">
+                                            <button class="btn btn-danger form-control" type="submit">Remove</button>
+                                        </form>
+                                    </td>
                                 </tr>
                             {% endfor %}
                         </tbody>

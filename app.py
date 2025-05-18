@@ -4,9 +4,12 @@ import datetime
 import secrets
 from hashlib import sha512
 from DB import database
+from ADScripts import ad_config
 app = Flask(__name__)
 # app.secret_key = secrets.token_hex(64)
 app.secret_key = "TEMP"
+
+
 @app.route('/')
 def home():  # put application's code here
 
@@ -52,11 +55,9 @@ def search():
         search_results = database.web_get_all_database_computers()
 
         search_results = dict(search_results)
-        print(" FROM DB ", search_results)
         r = re.compile(re.escape(computer_name), re.IGNORECASE)
 
         search_results_final = [(key, value) for key, value in search_results.items() if r.search(key)]
-        print(" AFTER RE ", search_results_final)
 
 
     return render_template("search.html", search_results=search_results_final)
@@ -71,40 +72,83 @@ def logout():
 def computer(computer_id):
     if "username" not in session:
         return redirect(url_for('login'))
-    users = ["FYP\\Zythia",
-        "FYP\\zythum",
-        "FYP\\Zyzomys",
-        "FYP\\Zyzzogeton",
-        "FYP\\zyzzyva",
-        "FYP\\zyzzyvas",
-        "FYP\\ZZ",
-        "FYP\\Zz",
-        "FYP\\zZt",
-        "FYP\\ZZZ"
-    ]
 
-    mock_details = {
-        "computer_name": "WINSERVFYP.FYP.LOC",
-        "os": "Windows Server 2019",
-        "ip_address": "192.168.1.10",
-        "users": users,
-        "sessions": [
-            {
-                "username": "FYP\\demoadmin",
-                "start_time": datetime.datetime.now(),
-                "expiry_time": datetime.datetime.now() + datetime.timedelta(hours=4),
-                "reason": "Software upgrade"
-            }
-        ]
+    computer_details = database.web_get_computer_details(computer_id)
+    # print("Computer details: ")
+    # print(computer_details)
+
+    raw_sessions = database.get_sessions_by_computer_db(computer_details[1])
+    # print("Sessions: ")
+    # print(raw_sessions)
+
+    admins = database.get_computer_admins(computer_details[1])
+    # print("Admins")
+    # print(admins)
+    admins = dict(admins)
+
+    # Convert admin id to admin name for display
+    new_admins = []
+    for admin in admins.keys():
+        admin_name = database.get_user_from_id(admin) if database.get_user_from_id(admin) else admin
+        new_admins.append({"username": admin_name, "persistent": admins[admin]}) # Sets value to the persistent
+
+    sessions = []
+
+    for sesh in raw_sessions:
+        username = database.get_user_from_id(sesh[1]) if database.get_user_from_id(sesh[1]) else sesh[1]
+        sessions.append({
+            "username": username,
+            "start_time": sesh[2],
+            "expiry_time": sesh[3],
+            "reason": sesh[4]
+        })
+
+
+    details = {
+        "computer_id": computer_id,
+        "computer_name": computer_details[1],
+        "os": computer_details[4],
+        "ip_address": computer_details[3],
+        "users": new_admins,
+        "sessions": sessions
     }
+
     # POST when a user is added to the admin list of the machine
     if request.method == "POST":
         if not session["is_admin"]:
+            flash("You do not have the required permission to perform this action")
             return redirect(url_for('computer', computer_id=computer_id))
-        # Code to add user to computer here
+        print(request.form)
+        if request.form.get("process") == "add":
+            # Code to add user to computer here
+            username = request.form.get("username")
+            print(username)
+            if not username[:3] == ad_config["DomainNetBIOSName"]:
+                username = ad_config["DomainNetBIOSName"] + "\\" + username
+            if database.add_user_to_admin(username, computer_details[1], ad_config["DomainNetBIOSName"]):
+                flash(f"Successfully added {username} to the admin list")
+                print(f"Successfully added {username} to the admin list")
+                return redirect(url_for('computer', computer_id=computer_id))
+            else:
+                flash(f"Failed to add {username} to the admin list")
+                print(f"Failed to add {username} to the admin list")
 
+                return redirect(url_for('computer', computer_id=computer_id))
+        elif request.form.get("process") == "remove":
+            username = request.form.get("username")
+            if database.remove_user_from_admin(username, computer_details[1]):
+                flash(f"Successfully removed {username} from the admin list")
+                print(f"Successfully removed {username} from the admin list")
+                return redirect(url_for('computer', computer_id=computer_id))
+            else:
+                flash(f"Failed to remove {username} from the admin list")
+                print(f"Failed to remove {username} from the admin list")
+                return redirect(url_for('computer', computer_id=computer_id))
+        else:
+            flash("Invalid operation")
+            return redirect(url_for('computer', computer_id=computer_id))
 
-    return render_template("computer_info.html", computer_details=mock_details)
+    return render_template("computer_info.html", computer_details=details)
 
 @app.route("/session", methods=['GET', 'POST'])
 def session_manager():
