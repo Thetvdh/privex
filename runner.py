@@ -27,7 +27,7 @@ def main_loop():
     1) Get all AD Users
     2) Get all AD Computers
     3) Get Admins
-    4) Add and Remove as applicable
+    4) Remove as applicable
     """
     ad_config = load_config()
 
