@@ -6,8 +6,7 @@ from DB import database
 from ADScripts import ad_config
 from Scanner.scanner import create_session
 app = Flask(__name__)
-# app.secret_key = secrets.token_hex(64)
-app.secret_key = "TEMP"
+app.secret_key = "48f5bc19c3f1addf59500533b70ac4dbe8c78fae7bd931bccaae163bb7ea8f11c25a60e57340feba21724be370fe5953130ec2758b78c4ef3b613ab53bf72cb8"
 
 
 @app.route('/')
