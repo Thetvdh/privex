@@ -2,19 +2,16 @@ from ldap3 import Server, Connection, ALL, NTLM
 import json
 import yaml
 import socket
+from ADScripts import ad_config
 
 from ldap3.core.exceptions import LDAPBindError, LDAPSocketOpenError
 
 
-def load_config():
-    with open("domain_config.yaml", "r") as config_file:
-        ad_config = yaml.safe_load(config_file)
-    return ad_config
 
 
 class LDAPController:
     def __init__(self):
-        self.AD_CONFIG = load_config()
+        self.AD_CONFIG = ad_config
         self.AD_SERVER = f'ldap://{self.AD_CONFIG["DomainPreferredLDAPServer"]}'
         self.USER = f"{self.AD_CONFIG['DomainNetBIOSName']}\\{self.AD_CONFIG['ScannerUsername']}"
         self.PASSWORD = self.AD_CONFIG['ScannerPassword']
