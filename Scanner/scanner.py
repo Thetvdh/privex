@@ -1,11 +1,9 @@
 import datetime
-
-from ldap3.operation.compare import compare_response_to_dict
-
 from ComputerInterface.linux import LinuxWorker
 from ComputerInterface.windows import WindowsWorker
 from DB import database
 from ADScripts.GetADInformation import LDAPController
+from ADScripts import ad_config
 import logging
 
 """
@@ -152,11 +150,25 @@ def add_sudoer_linux(computer_fqdn, username):
     """
     linux_interface = LinuxWorker()
     session = linux_interface.establish_connection(computer_fqdn)
+
+
+    # username = (username + "@" + ad_config["DomainDNSName"]) if username[:-len(ad_config["DomainDNSName"])] != ad_config["DomainDNSName"] else username
+    clean_dns_name = ad_config["DomainDNSName"].split(".")
+    clean_dns_name[0] = clean_dns_name[0].upper()
+    clean_dns_name[1] = clean_dns_name[1].lower()
+    dns_name = ".".join(clean_dns_name)
+    username = (username + "@" + dns_name) if username[:-len(dns_name)] != dns_name else username
+    print(username)
+
     if session:
         linux_interface.add_to_sudo(session, username)
         if linux_interface.check_added_to_sudo(session, username):
             logging.info(f"Added user {username} successfully to {computer_fqdn}")
             return True
+        print(f"Failed to add {username} to {computer_fqdn}")
+        return False
+    return False
+
 
 def remove_sudoer_linux(computer_fqdn, username):
     """
@@ -166,10 +178,19 @@ def remove_sudoer_linux(computer_fqdn, username):
     :return: 
     """
     linux_interface = LinuxWorker()
+    # clean_dns_name = ad_config["DomainDNSName"].split(".")
+    # clean_dns_name[0] = clean_dns_name[0].upper()
+    # clean_dns_name[1] = clean_dns_name[1].lower()
+    # dns_name = ".".join(clean_dns_name)
+    # username = (username + "@" + dns_name) if username[:-len(dns_name)] != dns_name else username
+
+    print(username)
+
     session = linux_interface.establish_connection(computer_fqdn)
     if session:
         linux_interface.remove_from_sudo(session, username)
         return linux_interface.check_removed_from_sudo(session, username)
+    return False
 
 def get_computer_info(computer_fqdn) -> bool | tuple:
     return database.get_computer_info(computer_fqdn)
