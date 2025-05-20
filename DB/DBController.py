@@ -545,7 +545,7 @@ class DBInterface(DBConnector):
 
     def web_check_allowed_to_elevate(self, computer_id, ad_user_id):
         try:
-            print("[DEBUG] TEsting if allowed to elevate")
+            print("[DEBUG] Testing if allowed to elevate")
             sql = """
             SELECT id FROM authorised_admins WHERE computer_id = ? AND user_id = ?
             """
