@@ -1,3 +1,5 @@
+import socket
+
 import paramiko
 import gssapi
 import yaml
@@ -63,6 +65,10 @@ class LinuxWorker:
                 password=self.password
             )
         except NoValidConnectionsError as err:
+            logging.error(err)
+            print("Failed to establish connection to computer", err)
+            return False
+        except socket.gaierror as err:
             logging.error(err)
             print("Failed to establish connection to computer", err)
             return False
