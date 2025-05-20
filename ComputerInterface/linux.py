@@ -128,14 +128,16 @@ class LinuxWorker:
         sanitised_sudoers = [i.strip() for i in sudoers]
         return sanitised_sudoers
 
-# try:
-#     client.connect("linservfyp.fyp.loc", username="svc_worker@FYP.loc", password="password")
-#     username = "basic@FYP.loc"
-#     add_to_sudo(username)
-#     print("Successfully added to sudo" if check_added_to_sudo(username) else "Failed to add")
-#     remove_from_sudo(username)
-#     print("Successfully removed from sudo" if not check_added_to_sudo(username) else "Failed to remove")
-# except paramiko.SSHException as exception:
-#     print("[ERROR] Failed to run command with exception:\n\n", exception)
-# finally:
-#     client.close()
+    def terminate_linux_session(self, client, username):
+        command = "ps -ef | grep sshd | grep -E %s | grep -v priv | awk '{print $2}'" % username
+        print(f"[DEBUG] {command}")
+        stdin, stdout, stderr = client.exec_command(command)
+        result = stdout.read() # should be PID
+        clean_result = result.decode().strip()
+        print("[DEBUG]", clean_result)
+        kill_command = f"sudo kill {clean_result}"
+        stdin, stdout, stderr = client.exec_command(kill_command)
+        result = stdout.read()
+        print("[DEBUG]", result)
+        return True
+

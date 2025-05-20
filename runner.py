@@ -110,8 +110,11 @@ def main_loop():
                 elif "linux" in computer[1].lower():
                     scanner.remove_sudoer_linux(computer[0], user_name_from_id)
                     if scanner.check_admin_removed_linux(computer[0], user_name_from_id):
-                        print(f"Admin {user} successfully removed")
-                        # TODO implement Linux session termination
+                        print(f"Admin {user} successfully removed, terminating session")
+                        if scanner.end_linux_ssh_session(computer[0], user_name_from_id):
+                            print(f"Admin {user} session successfully terminated")
+                        else:
+                            print(f"Admin {user} session failed to terminate")
                     else:
                         print(f"Admin {user} not removed")
                 else:
@@ -223,5 +226,6 @@ def setup():
             print(f"Invalid OS on {computer['FQDN']}")
 
 if __name__ == '__main__':
-    # main_loop()
-    scanner.end_windows_rdp_session("WINSERVFYP.FYP.LOC", "basic")
+    main_loop()
+    # scanner.end_windows_rdp_session("WINSERVFYP.FYP.LOC", "basic")
+    # scanner.add_sudoer_linux("LINSERVFYP.FYP.LOC", "basic")

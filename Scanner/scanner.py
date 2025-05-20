@@ -234,3 +234,11 @@ def end_windows_rdp_session(computer_name, username):
         print("Successfully ended RDP session")
         return True
     return False
+
+def end_linux_ssh_session(computer_name, username):
+    worker = LinuxWorker()
+    client = worker.establish_connection(computer_name)
+    if worker.terminate_linux_session(client, username):
+        print("Successfully terminated Linux session")
+        return True
+    return False
