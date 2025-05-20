@@ -16,11 +16,11 @@
                     <p><b>IP Address: </b>{{ computer_details["ip_address"] }}</p>
                     {% if "windows" in computer_details["os"].lower() %}
                         <div>
-                            <img src="{{ url_for("static", filename="images/windows.png") }}" style="position: absolute;top: 1rem; right: 1rem; width: 90px; height: auto">
+                            <img alt="WindowsLogo" src="{{ url_for("static", filename="images/windows.png") }}" style="position: absolute;top: 1rem; right: 1rem; width: 90px; height: auto">
                         </div>
                     {% elif "linux" in computer_details["os"].lower() %}
                         <div>
-                            <img src="{{ url_for("static", filename="images/linux.png") }}" style="position: absolute;top: 1rem; right: 1rem; width: 90px; height: auto">
+                            <img alt="LinuxLogo" src="{{ url_for("static", filename="images/linux.png") }}" style="position: absolute;top: 1rem; right: 1rem; width: 90px; height: auto">
                         </div>
                     {% endif %}
                 </div>
