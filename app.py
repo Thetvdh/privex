@@ -158,7 +158,7 @@ def session_manager():
         computer_id = database.get_computer_id(computer_fqdn)
         if not ad_username:
             print("Invalid username")
-            abort(500)
+            return abort(403)
 
         print("[DEBUG]", web_session_name, ad_user_id, computer_id)
         if database.web_check_allowed_to_elevate(computer_id, ad_user_id):
@@ -168,8 +168,8 @@ def session_manager():
             return "Successfully created session", 200
         else:
             print("Not allowed to elevate")
-            abort(500)
-    return "Server Error", 500
+            return abort(403)
+    return abort(500)
 
 
 @app.route("/admin", methods=['GET', 'POST'])
