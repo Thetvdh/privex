@@ -7,8 +7,6 @@ from ADScripts import ad_config
 from ldap3.core.exceptions import LDAPBindError, LDAPSocketOpenError
 
 
-
-
 class LDAPController:
     def __init__(self):
         self.AD_CONFIG = ad_config
