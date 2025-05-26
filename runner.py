@@ -61,14 +61,16 @@ def main_loop():
         print("Getting admins from DB")
         admins_from_db = interface.get_computer_admins(computer[0])
         print(f"Computer: {computer}\nAdmin List: {admins_from_computer}\nAdmin List (DB): {admins_from_db}")
-        # Convert admin username from windows to IDs
+        # Convert admin username from windows to IDs used in the database
         admins_from_computer_database_ids = []
         for admin in admins_from_computer:
             print("CHECKING ADMIN", admin)
-            if admin[:3] == ad_config["DomainNetBIOSName"]:
+            # Checks if the first characters are equal to the DomainNetBIOS (Likely a windows user)
+            if admin[:len(ad_config["DomainNetBIOSName"])] == ad_config["DomainNetBIOSName"]:
                 tmp = admin.split("\\")[-1]
                 admin_user_id = interface.get_user_id(tmp)
                 admins_from_computer_database_ids.append(admin_user_id)
+            # Checks if the username contains the DNS name (likely a linux user)
             elif admin.split("@")[-1].lower() == ad_config["DomainDNSName"].lower():
                 tmp = admin.split("@")[0]
                 print("[74] tmp value", tmp)
@@ -84,16 +86,18 @@ def main_loop():
         for user in admins_from_computer_database_ids:
             # User should be in the admin list, no issue
             admins_from_db_dict = dict(admins_from_db)
-            username = interface.get_user_from_id(user)
+            username = interface.get_user_from_id(user) # Variable set here for the purpose of checking the session validity
             print(computer[0], interface.get_user_from_id(user))
             # Checks if the user is in the database and persistent
             if user in admins_from_db_dict.keys() and admins_from_db_dict.get(user):
                 print(f"[85] User {user} is a valid admin")
                 # Checks if the user is persistent
 
+            # Check if user has a valid session
             elif not admins_from_db_dict.get(user) and scanner.check_session_validity_computer(computer[0], username):
-                # Check if user has a valid session
-                print(f"[89] User {user} is a valid admin")
+                print(f"User {user} is a valid admin")
+
+            # Skips attempt at removal as this is the built in administrator for windows
             elif "windows" in computer[1].lower() and "Administrator" in user:
                 print("This is the built in administrator user, skipping")
 
@@ -105,9 +109,12 @@ def main_loop():
                 if not user_name_from_id: # Likely means it is a local account and therefore the account name is the same as the ID
                     user_name_from_id = user
                 if "windows" in computer[1].lower():
+                    # removes the administrator from the computer
                     scanner.remove_admin_windows(computer[0], user_name_from_id)
+                    # Check if the administrator has been correctly removed
                     if scanner.check_admin_removed_windows(computer[0], user_name_from_id):
                         print(f"Admin {user} successfully removed, terminating session")
+                        # Terminates any RDP session should one exist
                         if scanner.end_windows_rdp_session(computer[0], user_name_from_id):
                             print(f"Admin {user} session successfully terminated")
                         else:
@@ -115,12 +122,16 @@ def main_loop():
                     else:
                         print(f"Admin {user} unsuccessfully removed")
                 elif "linux" in computer[1].lower():
+                    # Adds the DNS name to the end of the username
                     clean_fqdn = ad_config["DomainDNSName"].split(".")
                     clean_fqdn = clean_fqdn[0].upper() + clean_fqdn[1].lower()
                     username_with_dns_suffix = user_name_from_id + "@" + clean_fqdn
+                    # Removes the user from the sudo group
                     scanner.remove_sudoer_linux(computer[0], username_with_dns_suffix)
+                    # checks if the user has been removed
                     if scanner.check_admin_removed_linux(computer[0], username_with_dns_suffix):
                         print(f"Admin {user} successfully removed, terminating session")
+                        # Kills the linux SSH session if it exists
                         if scanner.end_linux_ssh_session(computer[0], username_with_dns_suffix):
                             print(f"Admin {user} session successfully terminated")
                         else:
@@ -130,8 +141,8 @@ def main_loop():
                 else:
                     print(f"Unknown OS for computer {computer[0]} {computer[1]}")
 
-# test
 
+# CLI is not called, left in for purposes of showing part of the development
 def cli():
     print("1) Add admin")
     print("2) Remove admin")
@@ -219,7 +230,7 @@ def cli():
             print(f"Successfully added user to admin {user_name}")
 
 
-
+# Function to setup the project when the domain is created
 def setup():
     computers = scanner.get_computers()
     interface = database
@@ -237,5 +248,3 @@ def setup():
 
 if __name__ == '__main__':
     main_loop()
-    # scanner.end_windows_rdp_session("WINSERVFYP.FYP.LOC", "basic")
-    # scanner.add_sudoer_linux("LINSERVFYP.FYP.LOC", "basic")
