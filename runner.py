@@ -82,11 +82,9 @@ def main_loop():
         # Compare lists between known good in database and data from computers
 
         for user in admins_from_computer_database_ids:
-            print("USER IN LIST", user)
             # User should be in the admin list, no issue
             admins_from_db_dict = dict(admins_from_db)
             username = interface.get_user_from_id(user)
-            print(f"USERNAME FOR {user}", username)
             print(computer[0], interface.get_user_from_id(user))
             # Checks if the user is in the database and persistent
             if user in admins_from_db_dict.keys() and admins_from_db_dict.get(user):

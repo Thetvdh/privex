@@ -234,9 +234,7 @@ def create_session(computer_fqdn, username, reason) -> str:
 
 
 def check_session_validity_computer(computer_fqdn, username):
-    print("[HIT] FOR COMPUTER", computer_fqdn)
     sessions = database.get_non_expired_sessions_by_computer_and_user(computer_fqdn, username)
-    print("[DEBUG] LOOK AT ME I'M HERE", sessions)
     if not sessions:
         return False  # Returns false as no valid session exists for that user
     any_expired = False

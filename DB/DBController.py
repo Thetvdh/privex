@@ -352,8 +352,6 @@ class DBInterface(DBConnector):
         """
         computer_id = self.get_computer_id(computer_name)
         user_id = self.get_user_id(user_name)
-        print("User ID", user_id, "Computer ID", computer_id)
-        print("Username passed to program", user_name)
         if not computer_id and not user_id:
             print(f"Unable to get ID for computer {computer_name} or user {user_name}")
             return []
