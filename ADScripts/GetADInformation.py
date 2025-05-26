@@ -15,7 +15,7 @@ class LDAPController:
         self.BASE_DN = self.AD_CONFIG['DomainBaseDN']
         self.conn = self.bind_connection()
 
-
+    # Establishes an LDAP Bind connection with the Domain Controller / Preferred LDAP server
     def bind_connection(self):
         # Create an LDAP server object using SSL
         server = Server(self.AD_SERVER, get_info=ALL, use_ssl=True)
@@ -99,12 +99,3 @@ class LDAPController:
 
     def __str__(self):
         return f"DEBUG\n{self.USER}, {self.PASSWORD}"
-
-if __name__ == '__main__':
-    controller = LDAPController()
-    controller.check_connection()
-    ad_computers = controller.get_ad_computers()
-    ad_users = controller.get_ad_users()
-    print(json.dumps(ad_computers, indent=4))
-    print("\n\n\n\n")
-    print(json.dumps(ad_users, indent=4))
