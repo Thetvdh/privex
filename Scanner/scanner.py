@@ -38,6 +38,10 @@ ldap_controller = LDAPController()
 
 
 def get_computers():
+    """
+    wrapper function to retrieve computers from active directory.
+    :return:
+    """
     if not ldap_controller.conn:
         print("Unable to get ldap controller connection")
         logging.error("Unable to get ldap controller connection")
@@ -47,6 +51,10 @@ def get_computers():
 
 # Function to add computers in AD to the local database
 def add_computers():
+    """
+    wrapper function to add new computers to the database.
+    :return:
+    """
     computers = get_computers()
     for computer in computers:
         if database.check_unique_computer_sid(computer.get("objectSid")):
@@ -57,6 +65,10 @@ def add_computers():
 
 
 def get_users():
+    """
+    wrapper function to retrieve users from the Active Directory.
+    :return:
+    """
     if not ldap_controller.conn:
         print("Unable to get ldap controller connection")
         logging.error("Unable to get ldap controller connection")
@@ -65,6 +77,10 @@ def get_users():
     return users
 
 def add_users():
+    """
+    wrapper function to add new users to the database.
+    :return:
+    """
     users = get_users()
     for user in users:
         if database.check_unique_user_sid(user.get("objectSid")):
@@ -74,12 +90,23 @@ def add_users():
             logging.info(f"Failed to add user {user['samAccountName']}")
 
 def get_computer_admins_windows(computer_fqdn) -> list:
+    """
+    Wrapper function to get all the administrators on a windows computer
+    :param computer_fqdn:
+    :return:
+    """
     win_interface = WindowsWorker()
     session = win_interface.establish_winrm_session(computer_fqdn)
     return win_interface.get_computer_administrators(session)
 
 # adds an administrator to the specified Windows computer
 def add_admin_windows(computer_fqdn, username) -> bool:
+    """
+    Wrapper function to add an administrator to a windows computer
+    :param computer_fqdn:
+    :param username:
+    :return:
+    """
     # add code to check if user exists
     win_interface = WindowsWorker()
     session = win_interface.establish_winrm_session(computer_fqdn)
@@ -90,6 +117,12 @@ def add_admin_windows(computer_fqdn, username) -> bool:
         return False
 
 def remove_admin_windows(computer_fqdn, username):
+    """
+    Wrapper function to remove an administrator from a windows computer
+    :param computer_fqdn:
+    :param username:
+    :return:
+    """
     win_interface = WindowsWorker()
     session = win_interface.establish_winrm_session(computer_fqdn)
     if session:
@@ -98,6 +131,12 @@ def remove_admin_windows(computer_fqdn, username):
         logging.error("Unable to remove admin due to missing session")
 
 def check_admin_removed_windows(computer_fqdn, username):
+    """
+    Wrapper function to check if an administrator has been removed from the windows computer
+    :param computer_fqdn:
+    :param username:
+    :return:
+    """
     win_interface = WindowsWorker()
     session = win_interface.establish_winrm_session(computer_fqdn)
     if session:
@@ -105,7 +144,13 @@ def check_admin_removed_windows(computer_fqdn, username):
     else:
         logging.error("Unable to check admin removal due to missing session")
 
-def check_admin_removed_linux(computer_fqdn, username):
+def check_admin_removed_linux(computer_fqdn, username) -> bool:
+    """
+    Wrapper function to check if an administrator has been removed from the linux computer
+    :param computer_fqdn:
+    :param username:
+    :return:
+    """
     linux_interface = LinuxWorker()
     client = linux_interface.establish_connection(computer_fqdn)
     if client:
@@ -138,7 +183,13 @@ def get_computer_admins_linux(computer_fqdn) -> list:
         return []
 
 def add_admin_database(computer_fqdn, username) -> bool:
-    database.add_user_to_admin(username, computer_fqdn)
+    """
+    Wrapper function to add an administrator to a computer in the database
+    :param computer_fqdn:
+    :param username:
+    :return:
+    """
+    return database.add_user_to_admin(username, computer_fqdn)
 
 
 def add_sudoer_linux(computer_fqdn, username):
@@ -151,7 +202,7 @@ def add_sudoer_linux(computer_fqdn, username):
     linux_interface = LinuxWorker()
     session = linux_interface.establish_connection(computer_fqdn)
 
-
+    # Fixes the DNS name to be in the format username@UPPER.lower
     clean_dns_name = ad_config["DomainDNSName"].split(".")
     clean_dns_name[0] = clean_dns_name[0].upper()
     clean_dns_name[1] = clean_dns_name[1].lower()
@@ -177,11 +228,6 @@ def remove_sudoer_linux(computer_fqdn, username):
     :return: 
     """
     linux_interface = LinuxWorker()
-    # clean_dns_name = ad_config["DomainDNSName"].split(".")
-    # clean_dns_name[0] = clean_dns_name[0].upper()
-    # clean_dns_name[1] = clean_dns_name[1].lower()
-    # dns_name = ".".join(clean_dns_name)
-    # username = (username + "@" + dns_name) if username[:-len(dns_name)] != dns_name else username
 
     print(username)
 
@@ -192,6 +238,11 @@ def remove_sudoer_linux(computer_fqdn, username):
     return False
 
 def get_computer_info(computer_fqdn) -> bool | tuple:
+    """
+    Gets informatino about a computer from the database
+    :param computer_fqdn:
+    :return:
+    """
     return database.get_computer_info(computer_fqdn)
 
 def create_session(computer_fqdn, username, reason) -> str:
@@ -234,6 +285,12 @@ def create_session(computer_fqdn, username, reason) -> str:
 
 
 def check_session_validity_computer(computer_fqdn, username):
+    """
+    Function to check the validity of a session in the database
+    :param computer_fqdn:
+    :param username:
+    :return:
+    """
     sessions = database.get_non_expired_sessions_by_computer_and_user(computer_fqdn, username)
     if not sessions:
         return False  # Returns false as no valid session exists for that user
@@ -248,6 +305,12 @@ def check_session_validity_computer(computer_fqdn, username):
     return not any_expired
 
 def end_windows_rdp_session(computer_name, username):
+    """
+    Function to end a windows rdp session
+    :param computer_name:
+    :param username:
+    :return:
+    """
     worker = WindowsWorker()
     session = worker.establish_winrm_session(computer_name)
     if worker.end_rdp_session(session, username):
@@ -256,6 +319,12 @@ def end_windows_rdp_session(computer_name, username):
     return False
 
 def end_linux_ssh_session(computer_name, username):
+    """
+    Function to end a linux ssh session
+    :param computer_name:
+    :param username:
+    :return:
+    """
     worker = LinuxWorker()
     client = worker.establish_connection(computer_name)
     if worker.terminate_linux_session(client, username):
