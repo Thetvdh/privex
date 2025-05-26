@@ -1,0 +1,13 @@
+{% extends "master.html" %}
+
+{% block title %}<h1 class="text-center mb-4">Whoops - Server Error</h1>{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <h1>Looks like we have encountered a server error!</h1>
+    </div>
+    <div class="row">
+        <a class="btn btn-primary" href="{{ url_for("search") }}">Click here to return to search</a>
+    </div>
+</div>
