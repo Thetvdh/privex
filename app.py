@@ -70,16 +70,10 @@ def computer(computer_id):
         return redirect(url_for('login'))
 
     computer_details = database.web_get_computer_details(computer_id)
-    # print("Computer details: ")
-    # print(computer_details)
 
     raw_sessions = database.get_sessions_by_computer_db(computer_details[1])
-    # print("Sessions: ")
-    # print(raw_sessions)
 
     admins = database.get_computer_admins(computer_details[1])
-    # print("Admins")
-    # print(admins)
     admins = dict(admins)
 
     # Convert admin id to admin name for display
