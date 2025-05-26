@@ -73,7 +73,6 @@ class WindowsWorker:
     # It gets both domain users and locally added / created users
     def get_computer_administrators(self, session) -> list:
         """
-
         :rtype: list
         :param session: 
         :return: 
@@ -124,10 +123,10 @@ class WindowsWorker:
         :return: 
         """
         try:
-            ps_script_add_administrator = f"""
+            ps_script_del_administrator = f"""
             Remove-LocalGroupMember -Group "Administrators" -Member {username}
             """
-            response = session.run_ps(ps_script_add_administrator)
+            response = session.run_ps(ps_script_del_administrator)
             if response.status_code == 0:
                 logging.info(f"Successfully removed {username} from Administrators group")
                 return True

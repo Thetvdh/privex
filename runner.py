@@ -64,8 +64,14 @@ def main_loop():
         # Convert admin username from windows to IDs
         admins_from_computer_database_ids = []
         for admin in admins_from_computer:
+            print("CHECKING ADMIN", admin)
             if admin[:3] == ad_config["DomainNetBIOSName"]:
                 tmp = admin.split("\\")[-1]
+                admin_user_id = interface.get_user_id(tmp)
+                admins_from_computer_database_ids.append(admin_user_id)
+            elif admin.split("@")[-1].lower() == ad_config["DomainDNSName"].lower():
+                tmp = admin.split("@")[0]
+                print("[74] tmp value", tmp)
                 admin_user_id = interface.get_user_id(tmp)
                 admins_from_computer_database_ids.append(admin_user_id)
             else:
@@ -76,17 +82,20 @@ def main_loop():
         # Compare lists between known good in database and data from computers
 
         for user in admins_from_computer_database_ids:
+            print("USER IN LIST", user)
             # User should be in the admin list, no issue
             admins_from_db_dict = dict(admins_from_db)
-
+            username = interface.get_user_from_id(user)
+            print(f"USERNAME FOR {user}", username)
             print(computer[0], interface.get_user_from_id(user))
             # Checks if the user is in the database and persistent
             if user in admins_from_db_dict.keys() and admins_from_db_dict.get(user):
-                print(f"User {user} is a valid admin")
+                print(f"[85] User {user} is a valid admin")
                 # Checks if the user is persistent
-            elif not admins_from_db_dict.get(user) and scanner.check_session_validity_computer(computer[0], interface.get_user_from_id(user)):
+
+            elif not admins_from_db_dict.get(user) and scanner.check_session_validity_computer(computer[0], username):
                 # Check if user has a valid session
-                print(f"User {user} is a valid admin")
+                print(f"[89] User {user} is a valid admin")
             elif "windows" in computer[1].lower() and "Administrator" in user:
                 print("This is the built in administrator user, skipping")
 
@@ -108,10 +117,13 @@ def main_loop():
                     else:
                         print(f"Admin {user} unsuccessfully removed")
                 elif "linux" in computer[1].lower():
-                    scanner.remove_sudoer_linux(computer[0], user_name_from_id)
-                    if scanner.check_admin_removed_linux(computer[0], user_name_from_id):
+                    clean_fqdn = ad_config["DomainDNSName"].split(".")
+                    clean_fqdn = clean_fqdn[0].upper() + clean_fqdn[1].lower()
+                    username_with_dns_suffix = user_name_from_id + "@" + clean_fqdn
+                    scanner.remove_sudoer_linux(computer[0], username_with_dns_suffix)
+                    if scanner.check_admin_removed_linux(computer[0], username_with_dns_suffix):
                         print(f"Admin {user} successfully removed, terminating session")
-                        if scanner.end_linux_ssh_session(computer[0], user_name_from_id):
+                        if scanner.end_linux_ssh_session(computer[0], username_with_dns_suffix):
                             print(f"Admin {user} session successfully terminated")
                         else:
                             print(f"Admin {user} session failed to terminate")

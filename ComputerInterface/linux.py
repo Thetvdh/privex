@@ -1,7 +1,5 @@
 import socket
-
 import paramiko
-import gssapi
 import yaml
 import subprocess
 import logging

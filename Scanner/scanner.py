@@ -152,7 +152,6 @@ def add_sudoer_linux(computer_fqdn, username):
     session = linux_interface.establish_connection(computer_fqdn)
 
 
-    # username = (username + "@" + ad_config["DomainDNSName"]) if username[:-len(ad_config["DomainDNSName"])] != ad_config["DomainDNSName"] else username
     clean_dns_name = ad_config["DomainDNSName"].split(".")
     clean_dns_name[0] = clean_dns_name[0].upper()
     clean_dns_name[1] = clean_dns_name[1].lower()
@@ -235,7 +234,9 @@ def create_session(computer_fqdn, username, reason) -> str:
 
 
 def check_session_validity_computer(computer_fqdn, username):
+    print("[HIT] FOR COMPUTER", computer_fqdn)
     sessions = database.get_non_expired_sessions_by_computer_and_user(computer_fqdn, username)
+    print("[DEBUG] LOOK AT ME I'M HERE", sessions)
     if not sessions:
         return False  # Returns false as no valid session exists for that user
     any_expired = False

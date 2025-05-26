@@ -1,6 +1,5 @@
 from ldap3 import Server, Connection, ALL, NTLM
 import json
-import yaml
 import socket
 from ADScripts import ad_config
 
