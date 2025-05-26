@@ -70,6 +70,8 @@ def computer(computer_id):
         return redirect(url_for('login'))
 
     computer_details = database.web_get_computer_details(computer_id)
+    if not computer_details:
+        return abort(500)
 
     raw_sessions = database.get_sessions_by_computer_db(computer_details[1])
 
