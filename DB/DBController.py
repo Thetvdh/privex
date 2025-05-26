@@ -206,6 +206,7 @@ class DBInterface(DBConnector):
                     self.connection.commit()
                     logging.info("Successfully added admin")
                     print("Successfully added admin")
+                    return True
                 else:
                     domain_account = False
                     admin_user_id = admin # Test how this works with removal from admins
@@ -213,9 +214,11 @@ class DBInterface(DBConnector):
                     self.connection.commit()
                     logging.info("Successfully added admin")
                     print("Successfully added admin")
+                    return True
             except sqlite3.OperationalError as error:
                 logging.error(f"{error}")
                 return False
+        return False
 
     def add_user_to_admin(self, user_name, computer_name, domain_netbios, persistent=False):
         computer_id = self.get_computer_id(computer_name)
