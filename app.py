@@ -5,8 +5,13 @@ from hashlib import sha512
 from DB import database
 from ADScripts import ad_config
 from Scanner.scanner import create_session
+import yaml
 app = Flask(__name__)
-app.secret_key = "48f5bc19c3f1addf59500533b70ac4dbe8c78fae7bd931bccaae163bb7ea8f11c25a60e57340feba21724be370fe5953130ec2758b78c4ef3b613ab53bf72cb8"
+
+with open("app_settings.yaml") as f:
+    app_settings = yaml.safe_load(f)
+
+app.secret_key = app_settings['SECRET_KEY']
 
 
 @app.route('/')
@@ -74,18 +79,14 @@ def computer(computer_id):
         return abort(500)
 
     raw_sessions = database.get_sessions_by_computer_db(computer_details[1])
-
     admins = database.get_computer_admins(computer_details[1])
     admins = dict(admins)
-
     # Convert admin id to admin name for display
     new_admins = []
     for admin in admins.keys():
         admin_name = database.get_user_from_id(admin) if database.get_user_from_id(admin) else admin
         new_admins.append({"username": admin_name, "persistent": admins[admin]}) # Sets value to the persistent
-
     sessions = []
-
     for sesh in raw_sessions:
         username = database.get_user_from_id(sesh[1]) if database.get_user_from_id(sesh[1]) else sesh[1]
         sessions.append({
@@ -94,8 +95,6 @@ def computer(computer_id):
             "expiry_time": sesh[3],
             "reason": sesh[4]
         })
-
-
     details = {
         "computer_id": computer_id,
         "computer_name": computer_details[1],
