@@ -296,7 +296,7 @@ def check_session_validity_computer(computer_fqdn, username):
         return False  # Returns false as no valid session exists for that user
     any_expired = False
     for session in sessions:
-        expiry_time = datetime.datetime.strptime(session[4], "%Y-%m-%d %H:%M:%S.%f")
+        expiry_time = datetime.datetime.strptime(session[4], "%Y-%m-%d %H:%M:%S.%f") # convert string to datetime object
         # If any have expired and there are multiple then all sessions need expiring. Should be 1 session per user per computer
         if expiry_time < datetime.datetime.now() or any_expired:
             any_expired = True
