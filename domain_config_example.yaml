@@ -1,0 +1,13 @@
+# Domain Information
+DomainDNSName: FYP.LOC
+DomainNetBIOSName: FYP
+DomainPreferredLDAPServer: FYPDC.FYP.loc
+DomainBaseDN: DC=fyp,DC=loc
+
+# Service Account Information
+ScannerUsername: svc_scanner
+ScannerPassword: WorkerPassword
+
+WorkerUsername: svc_worker
+WorkerPassword: WorkerPassword
+
