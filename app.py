@@ -114,12 +114,12 @@ def computer(computer_id):
             # Code to add user to computer here
             username = request.form.get("username")
             print(username)
-            if not username[:3] == ad_config["DomainNetBIOSName"]:
-                username = ad_config["DomainNetBIOSName"] + "\\" + username
             # Check to ensure account exists
             if not database.get_user_id(username):
                 flash("User does not exist")
                 return redirect(url_for('computer', computer_id=computer_id))
+            if not username[:3] == ad_config["DomainNetBIOSName"]:
+                username = ad_config["DomainNetBIOSName"] + "\\" + username
             if database.add_user_to_admin(username, computer_details[1], ad_config["DomainNetBIOSName"]):
                 flash(f"Successfully added {username} to the admin list")
                 print(f"Successfully added {username} to the admin list")
