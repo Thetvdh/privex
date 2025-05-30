@@ -124,7 +124,7 @@ def main_loop():
                 elif "linux" in computer[1].lower():
                     # Adds the DNS name to the end of the username
                     clean_fqdn = ad_config["DomainDNSName"].split(".")
-                    clean_fqdn = clean_fqdn[0].upper() + clean_fqdn[1].lower()
+                    clean_fqdn = clean_fqdn[0].upper() + "." + clean_fqdn[1].lower()
                     username_with_dns_suffix = user_name_from_id + "@" + clean_fqdn
                     # Removes the user from the sudo group
                     scanner.remove_sudoer_linux(computer[0], username_with_dns_suffix)
